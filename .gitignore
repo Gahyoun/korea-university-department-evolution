@@ -1,0 +1,7 @@
+# 원본 대학알리미 데이터 (용량상 미포함)
+*.xlsx
+# 중간 산출물
+data/
+__pycache__/
+.DS_Store
+.venv/
