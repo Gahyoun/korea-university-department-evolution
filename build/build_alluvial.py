@@ -52,7 +52,7 @@ def main():
             "trib": [b["name"] for b in d["bands"]],
             "cur": d["n_active_by_year"].get(str(meta["years"][-1]), 0),
         })
-    index.sort(key=lambda x: -x["cur"])
+    index.sort(key=lambda x: x["school"])   # 가나다순
     with open(os.path.join(ADIR, "_index.json"), "w", encoding="utf-8") as f:
         json.dump({"years": meta["years"], "schools": index}, f, ensure_ascii=False)
     # write viewer html

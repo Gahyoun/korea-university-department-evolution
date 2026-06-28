@@ -112,6 +112,7 @@ def school_graph(yrmap, years, id0, band):
             if uk not in agg:
                 agg[uk] = {"id": nid, "year": y, "dept": uk, "members": [], "band": band,
                            "sub": r["sub"] or r["mid"] or r["broad"] or "기타",
+                           "mid": r["mid"] or r["broad"] or "기타",
                            "broad": r["broad"] or "기타", "dcode": r["dcode"],
                            "norm": norm_name(uk), "stev": ev_status(r["event"])}
                 nid += 1
@@ -152,7 +153,13 @@ def build():
     YEARS = sorted({r["year"] for r in recs})
 
     out = {}
+    merged_away = set(mergers.keys())   # 흡수되어 본교 밴드로만 표시 -> 독립목록 제외
     for school, yrmap in by_school.items():
+        if school in merged_away:
+            continue
+        # active==0(빈 학교: 산업대 유령 등) 제외
+        if not any(r["present"] for rs in yrmap.values() for r in rs):
+            continue
         years = sorted(yrmap)
         nid = 0
         nodes, per_year, deaths, links, nid = school_graph(yrmap, years, nid, 0)
@@ -204,8 +211,7 @@ def build():
                        "n_active_by_year": {str(y): len(per_year[y]) for y in years},
                        "base2014": len(per_year[years[0]]) if years[0] == 2014 else 0}
 
-    meta = {"years": YEARS,
-            "schools": sorted(out, key=lambda s: -sum(out[s]["n_active_by_year"].values()))}
+    meta = {"years": YEARS, "schools": sorted(out)}   # 가나다순
     with open(os.path.join(ROOT, "data", "lineage.json"), "w", encoding="utf-8") as f:
         json.dump({"meta": meta, "schools": out}, f, ensure_ascii=False)
 

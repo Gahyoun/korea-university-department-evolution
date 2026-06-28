@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>소계열 학과명 분화 Alluvial · 2014–2026</title>
+<style>
+  :root{ --bg:#0f1115; --panel:#171a21; --ink:#e8eaed; --mut:#9aa0aa; --line:#2a2f3a;
+    --node:#5e6b82; --new:#3ddc84; --dead:#ff5d5d; --merge:#c89bff; --split:#ffb74d; }
+  *{box-sizing:border-box}
+  body{margin:0;font-family:-apple-system,BlinkMacSystemFont,"Apple SD Gothic Neo","Pretendard","Malgun Gothic",sans-serif;background:var(--bg);color:var(--ink)}
+  header{padding:10px 16px;border-bottom:1px solid var(--line);display:flex;gap:12px;align-items:center;flex-wrap:wrap;position:sticky;top:0;background:var(--bg);z-index:5}
+  h1{font-size:14px;margin:0;font-weight:700}
+  .sub{color:var(--mut);font-size:11px}
+  select,input{background:var(--panel);color:var(--ink);border:1px solid var(--line);border-radius:8px;padding:6px 9px;font-size:13px;outline:none}
+  select#sub{min-width:330px}
+  input.search{min-width:160px}
+  .chk{display:flex;align-items:center;gap:5px;font-size:12px;color:var(--mut);cursor:pointer}
+  .legend{display:flex;gap:10px;flex-wrap:wrap;font-size:11px;color:var(--mut);align-items:center;margin-left:auto}
+  .lg{display:inline-flex;align-items:center;gap:4px}.sw{width:11px;height:11px;border-radius:3px;display:inline-block}
+  #info{font-size:12px;color:var(--mut);padding:6px 16px;border-bottom:1px solid var(--line);background:var(--panel)}
+  #info b{color:var(--ink)}
+  #seriesbar{padding:6px 16px 8px;border-bottom:1px solid var(--line);background:#13161d;display:flex;align-items:center;gap:14px}
+  #seriesbar .cap{font-size:11px;color:var(--mut);white-space:nowrap;line-height:1.4}
+  #seriesbar .cap b{color:var(--ink);font-size:13px}
+  #seriesbar .up{color:var(--new)} #seriesbar .down{color:var(--dead)}
+  #wrap{position:relative;width:100%;height:calc(100vh - 150px);overflow:hidden;cursor:grab;background:var(--bg)}
+  #wrap.drag{cursor:grabbing}
+  svg{display:block}
+  .yearlbl{fill:var(--mut);font-size:13px;font-weight:600;text-anchor:middle}
+  .ycount{fill:#5b6675;font-size:10px;text-anchor:middle}
+  .nlabel{font-size:10px;fill:#e6eaf0;dominant-baseline:middle;pointer-events:none}
+  .nlabel.big{font-size:12px;font-weight:600}
+  .ribbon{stroke:none}.dim{opacity:.05}
+  #tip{position:fixed;pointer-events:none;background:#000e;border:1px solid var(--line);border-radius:8px;padding:9px 11px;font-size:12px;max-width:300px;display:none;z-index:9;line-height:1.5}
+  #tip .d{font-weight:700;font-size:13px;margin-bottom:3px}#tip .m{color:var(--mut)}
+  #tip .ex{color:#bcd;font-size:11px;margin-top:4px}
+  .badge{display:inline-block;font-size:10px;padding:1px 6px;border-radius:10px;margin:2px 3px 0 0;color:#111;font-weight:600}
+  .hint{position:absolute;right:12px;bottom:10px;font-size:11px;color:#5b6675;background:#0009;padding:6px 9px;border-radius:8px}
+  #err{padding:30px;color:var(--dead);font-size:13px;line-height:1.8;display:none}
+  code{background:#000;padding:2px 6px;border-radius:5px;color:#9fe}
+</style>
+</head>
+<body>
+<header>
+  <div><h1>소계열 학과명 분화 Alluvial</h1><div class="sub">전국 4년제 · 노드=학과명, 크기=학교 수 · 명칭 분화·개명 추적 · 2014–2026</div></div>
+  <select id="broad" title="대계열"></select>
+  <select id="mid" title="중계열"></select>
+  <select id="sub" title="소계열"></select>
+  <input class="search" id="q" placeholder="학과명 검색">
+  <label class="chk"><input type="checkbox" id="chgchk" checked> 분화/개명 링크</label>
+  <div class="legend" id="legend"></div>
+</header>
+<div id="info"></div>
+<div id="seriesbar"></div>
+<div id="err"></div>
+<div id="wrap"><svg id="svg"></svg>
+  <div class="hint">휠=확대 · 드래그=이동 · hover=정보/계보 · 같은 명칭은 가로 연속, 색 리본=분화/개명</div>
+</div>
+<div id="tip"></div>
+<script>
+const SVGNS="http://www.w3.org/2000/svg", $=id=>document.getElementById(id);
+let INDEX=null, DATA=null, HIER={}, ENTRY=null;
+const NODEW=13, COLGAP=170, PADTOP=50, PADL=70, GAP=2, COLTARGET=1250;
+const YEARS_ALL=[];
+
+async function boot(){
+  try{ INDEX=await (await fetch("namesplit/_index.json")).json(); }
+  catch(e){ $("err").style.display="block";
+    $("err").innerHTML="데이터 로드 실패 (file://는 fetch 차단). <b>out</b> 폴더에서<br><br><code>python3 -m http.server 8800</code><br><br>실행 후 접속."; return; }
+  YEARS_ALL.push(...INDEX.years);
+  // 계층 구성: broad -> mid -> [entry]
+  INDEX.subs.forEach(s=>{ (HIER[s.broad]=HIER[s.broad]||{}); (HIER[s.broad][s.mid]=HIER[s.broad][s.mid]||[]).push(s); });
+  fillSel($("broad"), Object.keys(HIER).sort());
+  $("broad").onchange=()=>{ fillMid(); };
+  $("mid").onchange=()=>{ fillSub(); };
+  $("sub").onchange=()=>{ const e=ENTRIES().find(x=>x.file===$("sub").value); if(e) selectEntry(e); };
+  $("chgchk").onchange=()=>{layout();render();};
+  $("q").oninput=highlight;
+  $("legend").innerHTML=
+    `<span class="lg"><span class="sw" style="background:var(--new)"></span>신설명칭</span>`+
+    `<span class="lg"><span class="sw" style="background:var(--split)"></span>분화(→타명칭)</span>`+
+    `<span class="lg"><span class="sw" style="background:var(--merge)"></span>개명/유입</span>`+
+    `<span class="lg"><span class="sw" style="background:var(--dead)"></span>소멸</span>`;
+  // 초기 선택 (URL ?sub= 우선)
+  const qp=new URLSearchParams(location.search);
+  let init=qp.get("sub") ? INDEX.subs.find(s=>s.sub.includes(qp.get("sub"))) : null;
+  if(!init) init=INDEX.subs.slice().sort((a,b)=>b.names-a.names)[0];
+  $("broad").value=init.broad; fillMid(); $("mid").value=init.mid; fillSub();
+  $("sub").value=init.file; selectEntry(init);
+}
+function fillSel(sel,arr){ sel.innerHTML=""; arr.forEach(v=>{const o=document.createElement("option");o.value=v;o.textContent=v;sel.appendChild(o);}); }
+function fillMid(){ const b=$("broad").value; fillSel($("mid"), Object.keys(HIER[b]||{}).sort()); fillSub(); }
+function ENTRIES(){ const b=$("broad").value,m=$("mid").value; return (HIER[b]&&HIER[b][m])?HIER[b][m].slice().sort((a,b)=>a.sub.localeCompare(b.sub)):[]; }
+function fillSub(){ const sel=$("sub"); sel.innerHTML="";
+  ENTRIES().forEach(e=>{const o=document.createElement("option");o.value=e.file;o.textContent=`${e.sub} · 명칭 ${e.names} · 분화 ${e.splits}`;sel.appendChild(o);}); }
+function selectEntry(e){ ENTRY=e; $("sub").value=e.file; load(e.file); seriesBar(e); }
+async function load(file){ DATA=await (await fetch(file)).json(); layout(); render(); buildInfo(); }
+
+function seriesBar(e){
+  const tot=e.tot, Y=YEARS_ALL, n=Y.length, mx=Math.max(1,...tot);
+  const W=Math.min(560, 26*n), H=46, bw=W/n;
+  let bars="";
+  for(let i=0;i<n;i++){ const h=tot[i]/mx*(H-14); const x=i*bw, y=H-h-12;
+    bars+=`<rect x="${x+2}" y="${y}" width="${bw-4}" height="${h}" rx="1.5" fill="#6aa6ff" fill-opacity="0.8"></rect>`;
+    if(i%2===0||i===n-1) bars+=`<text x="${x+bw/2}" y="${H-2}" font-size="8" fill="#6b7686" text-anchor="middle">'${String(Y[i]).slice(2)}</text>`;
+    bars+=`<text x="${x+bw/2}" y="${y-2}" font-size="8" fill="#9aa6b6" text-anchor="middle">${tot[i]||""}</text>`;
+  }
+  const a=tot[0], b=tot[n-1], d=b-a, pct=a?Math.round(d/a*100):0;
+  const cls=d>=0?"up":"down", sign=d>=0?"+":"";
+  $("seriesbar").innerHTML=
+    `<div class="cap">계열 학과 수<br><b>${a}</b> <span style="color:#6b7686">'14</span> → <b>${b}</b> <span style="color:#6b7686">'26</span> `+
+    `<span class="${cls}">${sign}${d} (${sign}${pct}%)</span></div>`+
+    `<svg width="${W}" height="${H}">${bars}</svg>`;
+}
+function chgOn(){return $("chgchk").checked;}
+function visL(l){ return chgOn() || l[2]===0; }   // l[2]=kind 0=cont, 3=change
+function buildInfo(){
+  const N=DATA.nodes,y=DATA.years; let nnew=0,nsp=0,nme=0;
+  N.forEach(n=>{const c=n[5]; if(c&1)nnew++; if(c&4)nsp++; if(c&2)nme++;});
+  $("info").innerHTML=[`<b>${DATA.sub}</b> · ${DATA.broad}`,`${y[0]}–${y[y.length-1]}`,
+    `명칭 <b>${N.length}</b>(노드) · 신설 <b>${nnew}</b> · 분화 <b>${nsp}</b> · 개명/유입 <b>${nme}</b>`].join(" &nbsp;|&nbsp; ");
+}
+// layout
+let POS=null,PPU=1,VYEARS=[];
+function layout(){
+  const N=DATA.nodes; VYEARS=DATA.years.slice(); const yidx={}; VYEARS.forEach((y,i)=>yidx[y]=i);
+  const cols=VYEARS.map(()=>[]); N.forEach((n,i)=>cols[yidx[n[0]]].push(i));
+  const fwd={},bwd={};
+  DATA.links.forEach(l=>{ if(!visL(l))return; (fwd[l[0]]=fwd[l[0]]||[]).push(l[1]); (bwd[l[1]]=bwd[l[1]]||[]).push(l[0]); });
+  cols.forEach(c=>c.sort((a,b)=>N[a][1].localeCompare(N[b][1])));
+  const ord={}; const reidx=()=>cols.forEach(c=>c.forEach((id,k)=>ord[id]=k)); reidx();
+  const bary=(id,adj)=>{const a=adj[id];if(!a||!a.length)return null;let s=0,w=0;a.forEach(x=>{const m=N[x][4];s+=ord[x]*m;w+=m;});return w?s/w:null;};
+  for(let it=0;it<8;it++){const dir=it%2===0;const seq=dir?[...cols.keys()].slice(1):[...cols.keys()].slice(0,-1).reverse();
+    seq.forEach(ci=>{const adj=dir?bwd:fwd; cols[ci].sort((a,b)=>{let ka=bary(a,adj),kb=bary(b,adj);if(ka===null)ka=ord[a];if(kb===null)kb=ord[b];return ka-kb||N[a][1].localeCompare(N[b][1]);});reidx();});}
+  let maxsum=1; cols.forEach(c=>{let s=0;c.forEach(id=>s+=N[id][4]);maxsum=Math.max(maxsum,s+c.length*GAP);});
+  PPU=Math.max(3.5,Math.min(40,COLTARGET/maxsum));
+  POS={}; let maxH=0;
+  cols.forEach((c,ci)=>{let yy=PADTOP; c.forEach(id=>{const h=Math.max(4,N[id][4]*PPU);POS[id]={x:PADL+ci*COLGAP,y:yy,h};yy+=h+GAP;}); maxH=Math.max(maxH,yy);});
+  POS._maxH=maxH; POS._cols=cols; POS._yidx=yidx;
+}
+let baseW,baseH,view=null;
+function render(){
+  const svg=$("svg"); svg.innerHTML=""; const N=DATA.nodes;
+  const W=PADL+(VYEARS.length-1)*COLGAP+280, H=POS._maxH+20; baseW=W; baseH=H;
+  svg.setAttribute("viewBox",`0 0 ${W} ${H}`); svg.setAttribute("width",W); svg.setAttribute("height",H);
+  VYEARS.forEach((y,i)=>{const x=PADL+i*COLGAP;
+    let t=el("text",{class:"yearlbl",x:x+NODEW/2,y:22});t.textContent=y;svg.appendChild(t);
+    const col=POS._cols[i]; let s=0; col.forEach(id=>s+=N[id][4]);
+    let c=el("text",{class:"ycount",x:x+NODEW/2,y:38});c.textContent=`${col.length}명칭`;svg.appendChild(c);});
+  const outs={},ins={};
+  DATA.links.forEach(l=>{ if(!visL(l))return; (outs[l[0]]=outs[l[0]]||[]).push(l); (ins[l[1]]=ins[l[1]]||[]).push(l); });
+  const lg=el("g",{}); svg.appendChild(lg);
+  const linkW=l=>Math.max(1.3, l[5]*PPU);
+  Object.values(outs).forEach(a=>a.sort((p,q)=>POS[p[1]].y-POS[q[1]].y));
+  Object.values(ins).forEach(a=>a.sort((p,q)=>POS[p[0]].y-POS[q[0]].y));
+  const outCur={},inCur={};
+  DATA.links.forEach(l=>{ if(!visL(l))return; const a=POS[l[0]],b=POS[l[1]]; if(!a||!b)return;
+    const w=linkW(l);
+    if(outCur[l[0]]===undefined)outCur[l[0]]=a.y; if(inCur[l[1]]===undefined)inCur[l[1]]=b.y;
+    const y1=outCur[l[0]],y2=inCur[l[1]]; outCur[l[0]]+=w; inCur[l[1]]+=w;
+    const x1=a.x+NODEW,x2=b.x,mx=(x1+x2)/2;
+    const d=`M${x1},${y1} C${mx},${y1} ${mx},${y2} ${x2},${y2} L${x2},${y2+w} C${mx},${y2+w} ${mx},${y1+w} ${x1},${y1+w} Z`;
+    let col="var(--node)",op=0.22;
+    if(l[2]!==0){ // 분화/개명
+      const tc=N[l[1]][5]; col= (tc&2)?"var(--merge)":"var(--split)"; op=0.55; }
+    const p=el("path",{class:"ribbon",d,fill:col,"fill-opacity":op}); p.dataset.s=l[0]; p.dataset.t=l[1]; lg.appendChild(p);
+  });
+  const ng=el("g",{}); svg.appendChild(ng);
+  N.forEach((n,i)=>{ const p=POS[i]; if(!p)return; const c=n[5];
+    const g=el("g",{}); g.dataset.id=i;
+    g.appendChild(el("rect",{x:p.x,y:p.y,width:NODEW,height:p.h,fill:"var(--node)",rx:2}));
+    if(c&1) g.appendChild(el("rect",{x:p.x-2.5,y:p.y,width:2.5,height:p.h,fill:"var(--new)"}));
+    if(c&8) g.appendChild(el("rect",{x:p.x+NODEW,y:p.y,width:2.5,height:p.h,fill:"var(--dead)"}));
+    if(c&2) g.appendChild(el("rect",{x:p.x-0.6,y:p.y-0.6,width:NODEW+1.2,height:p.h+1.2,fill:"none",stroke:"var(--merge)","stroke-width":1.4,rx:2}));
+    if(c&4) g.appendChild(el("rect",{x:p.x-0.6,y:p.y-0.6,width:NODEW+1.2,height:p.h+1.2,fill:"none",stroke:"var(--split)","stroke-width":1.4,rx:2}));
+    if(p.h>=7 || n[4]>=2){ const big=n[4]>=3;
+      const t=el("text",{class:"nlabel"+(big?" big":""),x:p.x+NODEW+4,y:p.y+p.h/2});
+      t.textContent=n[1].length>20?n[1].slice(0,20)+"…":n[1]; g.appendChild(t);}
+    g.addEventListener("mouseenter",e=>showTip(e,i)); g.addEventListener("mousemove",moveTip); g.addEventListener("mouseleave",hideTip);
+    ng.appendChild(g);
+  });
+  view=null;
+}
+const EVB=[[1,"new","신설명칭"],[4,"split","분화"],[2,"merge","개명/유입"],[8,"dead","소멸"]];
+function showTip(e,i){ const n=DATA.nodes[i],t=$("tip");
+  let ev=EVB.filter(b=>n[5]&b[0]).map(b=>`<span class="badge" style="background:var(--${b[1]},#888)">${b[2]}</span>`).join("");
+  let ex=n[6]&&n[6].length?`<div class="ex">학교 ${n[4]}곳: `+n[6].join(", ")+(n[4]>n[6].length?" 외":"")+`</div>`:"";
+  t.innerHTML=`<div class="d">${n[1]}</div><div class="m">${n[0]}년 · ${n[4]}개 학교</div>${ev?`<div>${ev}</div>`:""}${ex}`;
+  t.style.display="block"; moveTip(e); hl(i);
+}
+function moveTip(e){const t=$("tip");let x=e.clientX+14;if(x+300>innerWidth)x=e.clientX-300;t.style.left=x+"px";t.style.top=(e.clientY+14)+"px";}
+function hideTip(){$("tip").style.display="none"; if(!$("q").value)clearHL();}
+let NB=null;
+function nb(){if(NB)return NB;const f={},b={};DATA.links.forEach(l=>{if(!visL(l))return;(f[l[0]]=f[l[0]]||[]).push(l[1]);(b[l[1]]=b[l[1]]||[]).push(l[0]);});return NB={f,b};}
+function lineage(s){const {f,b}=nb();const seen=new Set([s]),st=[s];while(st.length){const x=st.pop();[...(f[x]||[]),...(b[x]||[])].forEach(y=>{if(!seen.has(y)){seen.add(y);st.push(y);}});}return seen;}
+function hl(i){const s=lineage(i);document.querySelectorAll("[data-id]").forEach(g=>g.classList.toggle("dim",!s.has(+g.dataset.id)));document.querySelectorAll(".ribbon").forEach(p=>p.classList.toggle("dim",!(s.has(+p.dataset.s)&&s.has(+p.dataset.t))));}
+function clearHL(){document.querySelectorAll(".dim").forEach(e=>e.classList.remove("dim"));NB=null;}
+function highlight(){NB=null;const q=$("q").value.trim();if(!q){clearHL();return;}const u=new Set();DATA.nodes.forEach((n,i)=>{if(n[1].includes(q))lineage(i).forEach(x=>u.add(x));});
+  document.querySelectorAll("[data-id]").forEach(g=>g.classList.toggle("dim",!u.has(+g.dataset.id)));document.querySelectorAll(".ribbon").forEach(p=>p.classList.toggle("dim",!(u.has(+p.dataset.s)&&u.has(+p.dataset.t))));}
+function el(tag,attr){const e=document.createElementNS(SVGNS,tag);for(const k in attr)e.setAttribute(k,attr[k]);return e;}
+(function(){const wrap=$("wrap");function vinit(){view={x:0,y:0,w:baseW||1000,h:baseH||800};}
+  const set=()=>$("svg").setAttribute("viewBox",`${view.x} ${view.y} ${view.w} ${view.h}`);
+  wrap.addEventListener("wheel",e=>{e.preventDefault();if(!view)vinit();const r=$("svg").getBoundingClientRect();
+    const mx=view.x+(e.clientX-r.left)/r.width*view.w,my=view.y+(e.clientY-r.top)/r.height*view.h;const f=e.deltaY<0?0.85:1.17;view.w*=f;view.h*=f;
+    view.x=mx-(e.clientX-r.left)/r.width*view.w;view.y=my-(e.clientY-r.top)/r.height*view.h;set();},{passive:false});
+  let drag=null;wrap.addEventListener("mousedown",e=>{if(e.target.closest("[data-id]"))return;if(!view)vinit();drag={x:e.clientX,y:e.clientY,vx:view.x,vy:view.y};wrap.classList.add("drag");});
+  window.addEventListener("mousemove",e=>{if(!drag)return;const r=$("svg").getBoundingClientRect();view.x=drag.vx-(e.clientX-drag.x)/r.width*view.w;view.y=drag.vy-(e.clientY-drag.y)/r.height*view.h;set();});
+  window.addEventListener("mouseup",()=>{drag=null;wrap.classList.remove("drag");});})();
+boot();
+</script>
+</body>
+</html>

@@ -151,13 +151,22 @@ def main():
     MANUAL_RENAME = {
         "경상대학교": "경상국립대학교",         # 국립화+통합 주체(메인) = 동일학교
         "서울과학기술대학교(산업대)": "서울과학기술대학교",
+        # 분교 -> 존속 캠퍼스 개명(같은 캠퍼스 식별, 통합 아님)
+        "연세대학교(원주)": "연세대학교(미래)",      # 2020 개명, 미래캠 존속
+        "한국전통문화대학교(일반)": "한국전통문화대학교",
+        # 2026 신설 캠퍼스(글로컬 통합)는 본교 소속으로
+        "국립목포대학교(담양캠퍼스)": "국립목포대학교",
+        "국립창원대학교(거창캠퍼스)": "국립창원대학교",
+        "국립창원대학교(남해캠퍼스)": "국립창원대학교",
     }
     # 통합으로 흡수된 학교 -> 흡수 주체, 통합연도 (캐노니컬 명칭 기준)
-    # 흡수된 학교는 자체 코드로 캐노니컬화되어 독립 학교로 남고,
-    # 흡수 주체 페이지에서 별도 밴드(하단)로 합쳐 표시한다.
+    # 흡수된 학교는 흡수 주체 페이지에서 하단 밴드로 합쳐 표시(독립목록에선 제외).
     MERGERS = {
         "경남과학기술대학교": {"into": "경상국립대학교", "year": 2022},
         "국립강릉원주대학교": {"into": "강원대학교",     "year": 2026},
+        # 분교가 본교 2캠퍼스로 흡수 = 사실상 학교통합
+        "상명대학교(천안)":   {"into": "상명대학교",     "year": 2017},
+        "홍익대학교(세종)":   {"into": "홍익대학교",     "year": 2017},
     }
 
     def canon_school(y, name):
@@ -210,6 +219,20 @@ def main():
                 "sub": get(r, cmap, "sub"),
             }
             records.append(rec)
+
+    # 2.5) 2026는 중/소계열 미수록(대계열만) -> 직전(<=2025) 동일(학교,학과명)에서 상속
+    prior = {}
+    for rec in records:
+        if rec["year"] <= 2025 and rec["sub"]:
+            prior[(rec["school"], rec["dept"])] = (rec["sub"], rec["mid"])
+    inherited = 0
+    for rec in records:
+        if rec["year"] == 2026:
+            pm = prior.get((rec["school"], rec["dept"]))
+            if pm:
+                rec["sub"], rec["mid"] = pm; inherited += 1
+            else:
+                rec["sub"] = ""        # 신규/매칭없음: 소계열 미상 -> broad 폴백
 
     # 3) merge candidate auto-detect: 학교(캐노니컬)별 활성 학과수가 직전연도>0 -> 0
     active_by_school = collections.defaultdict(lambda: collections.defaultdict(int))
