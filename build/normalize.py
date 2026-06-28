@@ -93,6 +93,14 @@ RE_MUJEONGONG = re.compile(
 RE_GYOYANG = re.compile(r"교양|학부대학|기초교육|기초교양|기초과학부|기초의과학|글로벌리더|자유전공")
 RE_FIRSTYEAR = re.compile(r"1학년|일학년|신입생|예과군|학부\(1")
 
+_DOTS = re.compile("\\s*[·・ㆍ‧⋅∙·･•]\\s*")
+def norm_series(s):
+    """중·소계열 명칭 정규화: 가운뎃점 변형/주변 공백 통일 (농림 · 수산 = 농림·수산)."""
+    s = (s or "").strip()
+    s = _DOTS.sub("·", s)
+    s = re.sub(r"\s+", " ", s).strip()
+    return s
+
 def canon_broad(b):
     """대계열 라벨 표기변동(인문ㆍ사회/인문사회계열 등) 통일."""
     b = (b or "").replace(" ", "")
@@ -215,8 +223,8 @@ def main():
                 "present": present,
                 "event": sorted(ev),
                 "broad": broad,
-                "mid": get(r, cmap, "mid"),
-                "sub": get(r, cmap, "sub"),
+                "mid": norm_series(get(r, cmap, "mid")),
+                "sub": norm_series(get(r, cmap, "sub")),
             }
             records.append(rec)
 
