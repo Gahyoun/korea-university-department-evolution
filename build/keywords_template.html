@@ -12,6 +12,8 @@
   header{padding:10px 16px;border-bottom:1px solid var(--line);display:flex;gap:12px;align-items:center;flex-wrap:wrap;position:sticky;top:0;background:var(--bg);z-index:5}
   h1{font-size:14px;margin:0;font-weight:700}
   .sub{color:var(--mut);font-size:11px}
+  a.home{color:var(--mut);font-size:11px;text-decoration:none;display:inline-block;margin-bottom:2px}
+  a.home:hover{color:var(--ink)}
   select{background:var(--panel);color:var(--ink);border:1px solid var(--line);border-radius:8px;padding:6px 9px;font-size:13px}
   .seg{display:inline-flex;border:1px solid var(--line);border-radius:8px;overflow:hidden}
   .seg button{background:var(--panel);color:var(--mut);border:0;padding:6px 12px;font-size:12px;cursor:pointer}
@@ -40,7 +42,7 @@
 </head>
 <body>
 <header>
-  <div><h1>학과 명칭 키워드 Temporal Analysis</h1>
+  <div><a class="home" href="index.html">← 변천사 홈</a><h1>학과 명칭 키워드 Temporal Analysis</h1>
     <div class="sub">2014–2026 · 소·대계열별 학과명 키워드 변화 · 버블 크기=빈도 · 대학알리미</div></div>
   <select id="broad"></select>
   <div class="seg" id="mode">
