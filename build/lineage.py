@@ -21,9 +21,17 @@ def unit_key(dept):
     return d
 
 def norm_name(s):
-    s = s or ""
-    s = re.sub(r"\(.*?\)", "", s).replace(" ", "")
-    s = re.sub(r"(학부|학과|전공|과정|계열|학|과|부)$", "", s)
+    # 학과/학부/전공/과 접미를 일관 정리(핵심어+'학' 유지): 간호학과=간호학전공=간호학부=간호학
+    s = re.sub(r"\(.*?\)", "", s or "").replace(" ", "")
+    for suf in ("전공", "과정"):
+        if s.endswith(suf):
+            s = s[:-2]; break
+    if s.endswith("학과") or s.endswith("학부"):
+        s = s[:-1]                       # 간호학과->간호학
+    elif s.endswith("계열"):
+        s = s[:-2]
+    elif len(s) >= 3 and s.endswith(("과", "부")):
+        s = s[:-1]
     return s
 
 def bigrams(s): return set(s[i:i+2] for i in range(len(s)-1)) or ({s} if s else set())
