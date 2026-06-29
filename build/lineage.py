@@ -213,6 +213,7 @@ def build():
         for n in nodes: n["first"], n["last"] = years[0], years[-1]
         bands = []
         absorbed_origin_targets = set()
+        ab_list = []   # (merge_year, 흡수밴드 norm 집합)
 
         for ab, my in absorbed_of.get(school, []):
             if ab not in by_school: continue
@@ -243,6 +244,7 @@ def build():
                 if tgt is not None:
                     xlinks.append({"s": a["id"], "t": tgt["id"], "k": "merge", "x": 0, "xb": 1})
                     absorbed_origin_targets.add(tgt["id"])
+            ab_list.append((my, {n["norm"] for n in bnodes}))
             nodes += bnodes; links += blinks + xlinks
             deaths_ab = {str(y): bdeaths[y] for y in bdeaths}
             bands.append({"idx": len(bands) + 1, "name": ab, "year": my,
@@ -253,6 +255,33 @@ def build():
         if absorbed_origin_targets:
             links = [l for l in links if not (l.get("xb") != 1 and l["k"] != "cont"
                                               and l["t"] in absorbed_origin_targets)]
+
+        # 통합 legacy ghost 제거: 흡수밴드와 같은 이름인데 band0 등장이 [통합-1, 통합] 구간에만 있고
+        # 통합연도까지만 존재(통합후 미존속)하는 band0 노드 = 흡수학교 학과의 잘못된 본교 중복.
+        if ab_list:
+            byid2 = {n["id"]: n for n in nodes}
+            adj = collections.defaultdict(set)
+            for l in links:
+                if l.get("xb") or l["k"] != "cont": continue
+                a, b = byid2.get(l["s"]), byid2.get(l["t"])
+                if a and b and a["band"] == 0 and b["band"] == 0:
+                    adj[l["s"]].add(l["t"]); adj[l["t"]].add(l["s"])
+            ghost = set()
+            for my, bnorms in ab_list:
+                for n in nodes:
+                    if n["band"] != 0 or n["id"] in ghost or n["norm"] not in bnorms:
+                        continue
+                    comp = {n["id"]}; st = [n["id"]]
+                    while st:
+                        x = st.pop()
+                        for y in adj[x]:
+                            if y not in comp: comp.add(y); st.append(y)
+                    yrs = [byid2[c]["year"] for c in comp]
+                    if min(yrs) >= my - 1 and max(yrs) <= my:
+                        ghost |= comp
+            if ghost:
+                nodes = [n for n in nodes if n["id"] not in ghost]
+                links = [l for l in links if l["s"] not in ghost and l["t"] not in ghost]
 
         finalize_events(nodes, links, years)
 
