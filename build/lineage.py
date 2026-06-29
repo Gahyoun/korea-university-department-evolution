@@ -207,6 +207,12 @@ def build():
                 if tgt is None:
                     cand = [m for m in main_my if "학부" in m["dept"] and len(a["norm"]) >= 2 and a["norm"] in m["norm"]]
                     if cand: tgt = cand[0]
+                if tgt is None:
+                    # 같은 소계열 인접분야 합병 추론 (컴퓨터공학->컴퓨터과학부 등)
+                    same = sorted([m for m in main_my if m["sub"] == a["sub"]],
+                                  key=lambda m: -jac(a["norm"], m["norm"]))
+                    if same and jac(a["norm"], same[0]["norm"]) >= 0.25:
+                        tgt = same[0]
                 if tgt is not None:
                     xlinks.append({"s": a["id"], "t": tgt["id"], "k": "merge", "x": 0, "xb": 1})
                     absorbed_origin_targets.add(tgt["id"])
@@ -216,9 +222,10 @@ def build():
                           "years": ab_years, "deaths": deaths_ab,
                           "n_active_by_year": {str(y): len(bpy[y]) for y in ab_years}})
 
-        # band0 내부 링크 중 흡수-출신 노드를 target 으로 하는 것 제거(고스트 ancestry 방지)
+        # band0 spurious 링크만 제거(고스트 ancestry 방지). cont(정상 연속)는 유지 -> 본교 자체 계보 보존.
         if absorbed_origin_targets:
-            links = [l for l in links if not (l.get("xb") != 1 and l["t"] in absorbed_origin_targets)]
+            links = [l for l in links if not (l.get("xb") != 1 and l["k"] != "cont"
+                                              and l["t"] in absorbed_origin_targets)]
 
         finalize_events(nodes, links, years)
 
