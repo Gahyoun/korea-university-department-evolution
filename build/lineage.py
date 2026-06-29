@@ -283,6 +283,12 @@ def build():
                 nodes = [n for n in nodes if n["id"] not in ghost]
                 links = [l for l in links if l["s"] not in ghost and l["t"] not in ghost]
 
+        # id 재색인: 산출 인코더/렌더러가 링크 s/t를 노드 배열 index로 참조하므로 id==index 보장 필수
+        idmap = {n["id"]: i for i, n in enumerate(nodes)}
+        for i, n in enumerate(nodes): n["id"] = i
+        links = [dict(l, s=idmap[l["s"]], t=idmap[l["t"]])
+                 for l in links if l["s"] in idmap and l["t"] in idmap]
+
         finalize_events(nodes, links, years)
 
         # cleanup working fields
