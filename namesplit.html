@@ -67,7 +67,7 @@ const NODEW=13, COLGAP=170, PADTOP=50, PADL=70, GAP=2, COLTARGET=1250;
 const YEARS_ALL=[];
 
 async function boot(){
-  try{ INDEX=await (await fetch("namesplit/_index.json")).json(); }
+  try{ INDEX=await (await fetch("namesplit/_index.json",{cache:"no-cache"})).json(); }
   catch(e){ $("err").style.display="block";
     $("err").innerHTML="데이터 로드 실패 (file://는 fetch 차단). <b>out</b> 폴더에서<br><br><code>python3 -m http.server 8800</code><br><br>실행 후 접속."; return; }
   YEARS_ALL.push(...INDEX.years);
@@ -97,7 +97,7 @@ function ENTRIES(){ const b=$("broad").value,m=$("mid").value; return (HIER[b]&&
 function fillSub(){ const sel=$("sub"); sel.innerHTML="";
   ENTRIES().forEach(e=>{const o=document.createElement("option");o.value=e.file;o.textContent=`${e.sub} · 명칭 ${e.names} · 분화 ${e.splits}`;sel.appendChild(o);}); }
 function selectEntry(e){ ENTRY=e; $("sub").value=e.file; load(e.file); seriesBar(e); }
-async function load(file){ DATA=await (await fetch(file)).json(); layout(); render(); buildInfo(); }
+async function load(file){ DATA=await (await fetch(file,{cache:"no-cache"})).json(); layout(); render(); buildInfo(); }
 
 function seriesBar(e){
   const tot=e.tot, Y=YEARS_ALL, n=Y.length, mx=Math.max(1,...tot);

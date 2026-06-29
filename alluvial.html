@@ -74,7 +74,7 @@ let INDEX=null, DATA=null, selBroad="ALL";
 const NODEW=13, COLGAP=160, PADTOP=50, PADL=70, GAP=2, BANDGAP=64, COLTARGET=1250;
 
 async function boot(){
-  try{ INDEX=await (await fetch("alluvial/_index.json")).json(); }
+  try{ INDEX=await (await fetch("alluvial/_index.json",{cache:"no-cache"})).json(); }
   catch(e){ $("err").style.display="block";
     $("err").innerHTML="데이터 로드 실패 (file://는 fetch 차단). <b>out</b> 폴더에서<br><br><code>python3 -m http.server 8800</code><br><br>실행 후 <code>http://localhost:8800/alluvial.html</code> 접속."; return; }
   const sel=$("school");
@@ -90,7 +90,7 @@ async function boot(){
   if(qp.get("broad")){selBroad=qp.get("broad"); $("broad").value=selBroad;}
   load(startFile);
 }
-async function load(file){ DATA=await (await fetch(file)).json(); buildLegend(); layout(); render(); buildInfo(); }
+async function load(file){ DATA=await (await fetch(file,{cache:"no-cache"})).json(); buildLegend(); layout(); render(); buildInfo(); }
 
 function visN(n){ return selBroad==="ALL" || n[3]===selBroad; }
 function softOn(){ return $("softchk").checked; }
