@@ -256,8 +256,8 @@ def build():
             links = [l for l in links if not (l.get("xb") != 1 and l["k"] != "cont"
                                               and l["t"] in absorbed_origin_targets)]
 
-        # 통합 legacy ghost 제거: 흡수밴드와 같은 이름인데 band0 등장이 [통합-1, 통합] 구간에만 있고
-        # 통합연도까지만 존재(통합후 미존속)하는 band0 노드 = 흡수학교 학과의 잘못된 본교 중복.
+        # 통합 legacy 제거: 흡수밴드(band1)와 같은 이름인데 band0 등장이 통합 시점부터 시작(min>=통합-1)
+        # = 본교(band0)에 원래 없던 흡수학교 단독학과. 통합 후 존속해도 본교 band0에선 제거(흡수밴드로만 표시).
         if ab_list:
             byid2 = {n["id"]: n for n in nodes}
             adj = collections.defaultdict(set)
@@ -277,7 +277,7 @@ def build():
                         for y in adj[x]:
                             if y not in comp: comp.add(y); st.append(y)
                     yrs = [byid2[c]["year"] for c in comp]
-                    if min(yrs) >= my - 1 and max(yrs) <= my:
+                    if min(yrs) >= my - 1:          # 본교에 통합 전 존재 이력 없음 -> 흡수학교 단독학과
                         ghost |= comp
             if ghost:
                 nodes = [n for n in nodes if n["id"] not in ghost]
@@ -295,11 +295,13 @@ def build():
         for n in nodes:
             for k in ("stev", "dcode", "norm", "first", "last"): n.pop(k, None)
 
+        # 활성 수는 최종(ghost 제거 후) band0 노드 기준으로 재계산
+        nayb = collections.Counter(n["year"] for n in nodes if n["band"] == 0)
         out[school] = {"years": years, "nodes": nodes, "links": links,
                        "deaths": {str(y): deaths[y] for y in deaths},
                        "bands": bands,
-                       "n_active_by_year": {str(y): len(per_year[y]) for y in years},
-                       "base2014": len(per_year[years[0]]) if years[0] == 2014 else 0}
+                       "n_active_by_year": {str(y): nayb.get(y, 0) for y in years},
+                       "base2014": nayb.get(years[0], 0) if years[0] == 2014 else 0}
 
     meta = {"years": YEARS, "schools": sorted(out)}   # 가나다순
     with open(os.path.join(ROOT, "data", "lineage.json"), "w", encoding="utf-8") as f:
