@@ -120,8 +120,9 @@ def link_pair(A, B):
         take(a, b, "soft")
     return links
 
-def school_graph(yrmap, years, id0, band):
-    """단일 학교 타임라인 -> nodes(per_year), links(연도간). id는 id0부터."""
+def school_graph(yrmap, years, id0, band, gyodae=False):
+    """단일 학교 타임라인 -> nodes(per_year), links(연도간). id는 id0부터.
+    gyodae=True(교육대학)면 '초등X교육'≡'X교육' (초등 접두 제거)로 매칭."""
     nid = id0
     nodes = []; per_year = collections.defaultdict(list); deaths = collections.defaultdict(list)
     for y in years:
@@ -131,11 +132,12 @@ def school_graph(yrmap, years, id0, band):
                 deaths[y].append({"dept": r["dept"], "broad": r["broad"]}); continue
             uk = unit_key(r["dept"])
             if uk not in agg:
+                mkey = re.sub(r"^초등(?=.+교육)", "", uk) if gyodae else uk  # 교대: 초등 접두 제거
                 agg[uk] = {"id": nid, "year": y, "dept": uk, "members": [], "band": band,
                            "sub": r["sub"] or r["mid"] or r["broad"] or "기타",
                            "mid": r["mid"] or r["broad"] or "기타",
                            "broad": r["broad"] or "기타", "dcode": r["dcode"],
-                           "norm": norm_name(uk), "stev": ev_status(r["event"])}
+                           "norm": norm_name(mkey), "stev": ev_status(r["event"])}
                 nid += 1
             agg[uk]["members"].append(r["dept"]); agg[uk]["stev"] |= ev_status(r["event"])
         for nd in agg.values():
@@ -183,7 +185,8 @@ def build():
             continue
         years = sorted(yrmap)
         nid = 0
-        nodes, per_year, deaths, links, nid = school_graph(yrmap, years, nid, 0)
+        gyodae = school.endswith("교육대학교")
+        nodes, per_year, deaths, links, nid = school_graph(yrmap, years, nid, 0, gyodae)
         for n in nodes: n["first"], n["last"] = years[0], years[-1]
         bands = []
         absorbed_origin_targets = set()
@@ -192,7 +195,8 @@ def build():
             if ab not in by_school: continue
             ab_years = [y for y in sorted(by_school[ab]) if y <= my - 1]
             if not ab_years: continue
-            bnodes, bpy, bdeaths, blinks, nid = school_graph(by_school[ab], ab_years, nid, len(bands) + 1)
+            bnodes, bpy, bdeaths, blinks, nid = school_graph(by_school[ab], ab_years, nid, len(bands) + 1,
+                                                             ab.endswith("교육대학교"))
             for n in bnodes: n["first"], n["last"] = ab_years[0], ab_years[-1] + 1  # last+1 so 마지막해 dead 아님(통합)
             # cross-band merge: absorbed last year -> main merge-year(my) nodes
             last_ab = bpy[ab_years[-1]]
