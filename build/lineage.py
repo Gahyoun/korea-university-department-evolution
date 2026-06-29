@@ -171,6 +171,28 @@ def school_graph(yrmap, years, id0, band, gyodae=False):
             links.append({"s": src["id"], "t": n["id"], "k": "cont",
                           "x": 1 if src["broad"] != n["broad"] else 0})
             has_in.add(n["id"]); has_out.add(src["id"])
+    # 폐지 재판단: 후속 없는(사망) 노드를 이후 연도의 같은 소계열·어간(stem) 일치 신설 노드와 연결.
+    # 원예학과->원예과학과 같은 명칭 진화(개명)를 이어 붙이고, 후속 데이터로 폐지 오분류를 교정.
+    def stem(nm):
+        for suf in ("과학", "공학", "학", "과", "부"):
+            if nm.endswith(suf) and len(nm) - len(suf) >= 2:
+                return nm[:-len(suf)]
+        return nm
+    born_idx = collections.defaultdict(list)
+    for n in nodes:
+        if n["year"] != years[0] and n["id"] not in has_in:
+            born_idx[(n["sub"], stem(n["norm"]))].append(n)
+    for d in sorted((n for n in nodes if n["year"] != years[-1] and n["id"] not in has_out),
+                    key=lambda n: n["year"]):
+        if d["id"] in has_out:
+            continue
+        cands = [b for b in born_idx.get((d["sub"], stem(d["norm"])), [])
+                 if b["year"] > d["year"] and b["id"] not in has_in and 0 < b["year"] - d["year"] <= 5]
+        if cands:
+            t = min(cands, key=lambda b: b["year"])
+            links.append({"s": d["id"], "t": t["id"], "k": "soft",
+                          "x": 1 if d["broad"] != t["broad"] else 0})
+            has_out.add(d["id"]); has_in.add(t["id"])
     return nodes, per_year, deaths, links, nid
 
 def finalize_events(nodes, links, years_main):
