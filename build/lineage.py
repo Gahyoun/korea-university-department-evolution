@@ -173,11 +173,13 @@ def school_graph(yrmap, years, id0, band, gyodae=False):
             has_in.add(n["id"]); has_out.add(src["id"])
     # 폐지 재판단: 후속 없는(사망) 노드를 이후 연도의 같은 소계열·어간(stem) 일치 신설 노드와 연결.
     # 원예학과->원예과학과 같은 명칭 진화(개명)를 이어 붙이고, 후속 데이터로 폐지 오분류를 교정.
+    STEM_SYN = {"수리": "수학", "수리과학": "수학", "수리정보": "수학"}  # 수학과<->수리과학과 등 동의어
     def stem(nm):
+        s = nm
         for suf in ("과학", "공학", "학", "과", "부"):
             if nm.endswith(suf) and len(nm) - len(suf) >= 2:
-                return nm[:-len(suf)]
-        return nm
+                s = nm[:-len(suf)]; break
+        return STEM_SYN.get(s, s)
     born_idx = collections.defaultdict(list)
     for n in nodes:
         if n["year"] != years[0] and n["id"] not in has_in:
