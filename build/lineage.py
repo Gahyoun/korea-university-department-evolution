@@ -134,20 +134,43 @@ def school_graph(yrmap, years, id0, band, gyodae=False):
             if uk not in agg:
                 mkey = re.sub(r"^초등(?=.+교육)", "", uk) if gyodae else uk  # 교대: 초등 접두 제거
                 agg[uk] = {"id": nid, "year": y, "dept": uk, "members": [], "band": band,
-                           "sub": r["sub"] or r["mid"] or r["broad"] or "기타",
-                           "mid": r["mid"] or r["broad"] or "기타",
+                           "sub_cnt": collections.Counter(), "mid_cnt": collections.Counter(),
                            "broad": r["broad"] or "기타", "dcode": r["dcode"],
                            "norm": norm_name(mkey), "stev": ev_status(r["event"])}
                 nid += 1
-            agg[uk]["members"].append(r["dept"]); agg[uk]["stev"] |= ev_status(r["event"])
+            nd = agg[uk]
+            nd["members"].append(r["dept"]); nd["stev"] |= ev_status(r["event"])
+            if r["sub"]: nd["sub_cnt"][r["sub"]] += 1
+            if r["mid"]: nd["mid_cnt"][r["mid"]] += 1
         for nd in agg.values():
             nd["members"] = sorted(set(nd["members"])); nd["msz"] = len(nd["members"])
+            # 학부 집계 노드의 소/중계열 = 멤버 다수결(N.C.E/빈값 제외 우선)
+            def pick(cnt):
+                good = [(c, s) for s, c in cnt.items() if s not in ("N.C.E", "N.C.E.")]
+                return (max(good)[1] if good else (max(cnt.items(), key=lambda kv: kv[1])[0] if cnt else ""))
+            nd["sub"] = pick(nd["sub_cnt"]) or nd["broad"] or "기타"
+            nd["mid"] = pick(nd["mid_cnt"]) or nd["broad"] or "기타"
+            del nd["sub_cnt"]; del nd["mid_cnt"]
             nodes.append(nd); per_year[y].append(nd)
     links = []
     byid = {n["id"]: n for n in nodes}
     for a, b in zip(years, years[1:]):
         for s, t, k in link_pair(per_year[a], per_year[b]):
             links.append({"s": s, "t": t, "k": k, "x": 1 if byid[s]["broad"] != byid[t]["broad"] else 0})
+    # gap-bridge: 같은 이름(norm)+소계열이 이전연도에 있었으면 신설 대신 연결(재등장)
+    has_in = {l["t"] for l in links}; has_out = {l["s"] for l in links}
+    by_ns = collections.defaultdict(list)
+    for n in nodes: by_ns[(n["norm"], n["sub"])].append(n)
+    for n in nodes:
+        if n["year"] == years[0] or n["id"] in has_in:
+            continue                                   # born(좌측 무링크)만 대상
+        cands = [m for m in by_ns[(n["norm"], n["sub"])]
+                 if m["year"] < n["year"] and m["id"] not in has_out and 0 < n["year"] - m["year"] <= 4]
+        if cands:
+            src = max(cands, key=lambda m: m["year"])
+            links.append({"s": src["id"], "t": n["id"], "k": "cont",
+                          "x": 1 if src["broad"] != n["broad"] else 0})
+            has_in.add(n["id"]); has_out.add(src["id"])
     return nodes, per_year, deaths, links, nid
 
 def finalize_events(nodes, links, years_main):

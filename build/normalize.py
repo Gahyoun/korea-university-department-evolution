@@ -92,8 +92,8 @@ RE_MUJEONGONG = re.compile(
 )
 RE_GYOYANG = re.compile(r"교양|학부대학|기초교육|기초교양|기초과학부|기초의과학|글로벌리더|자유전공")
 RE_FIRSTYEAR = re.compile(r"1학년|일학년|신입생|예과군|학부\(1")
-# 임시편성/모집단위(정규학과 아님): 기타모집단위, ...통합모집단위, 단과대학[통합모집], 새내기과정학부 등
-RE_ADMIN = re.compile(r"모집단위|통합모집|새내기")
+# 임시편성/모집단위(정규학과 아님): 기타모집단위, ...통합모집단위, 단과대학[통합모집], 새내기과정학부, 단일계열 등
+RE_ADMIN = re.compile(r"모집단위|통합모집|새내기|단일계열|단일학부")
 
 _DOTS = re.compile("\\s*[·・ㆍ‧⋅∙·･•]\\s*")
 def norm_series(s):
@@ -120,6 +120,10 @@ def is_excluded(dept, college):
     if RE_MUJEONGONG.search(d):
         return "무전공"
     if RE_ADMIN.search(d):
+        return "모집단위"
+    if d.endswith("계열"):                      # OO계열 모집단위
+        return "모집단위"
+    if d.endswith("대학") and not any(k in d for k in ("학과", "학부", "전공")):  # 단과대학명 광역모집
         return "모집단위"
     if RE_FIRSTYEAR.search(d):
         return "1학년전용"
@@ -203,6 +207,7 @@ def main():
             dept = get(r, cmap, "dept")
             if not dept:
                 continue
+            dept = _DOTS.sub("·", dept)   # 학과명 가운뎃점 변형(ㆍ/・) 통일
             college = get(r, cmap, "college")
             st = get(r, cmap, "status")
             present, ev = status_class(st)
