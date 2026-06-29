@@ -66,6 +66,19 @@ def link_pair(A, B):
         if a["norm"] and a["norm"] in byn:
             cs = [m for m in byn[a["norm"]] if m["id"] not in usedB]
             if cs: take(a, cs[0], "cont")
+    # 2.5) 느슨 매칭: 'X' vs 'X학'(학 유무만 차이) -> 연속. 핵심어 1글자(수학/화학/의학..)는 보호.
+    def base(nm): return nm[:-1] if (nm.endswith("학") and len(nm) >= 3) else nm
+    byb = collections.defaultdict(list)
+    for m in B:
+        if m["id"] in usedB: continue
+        bk = base(m["norm"])
+        if len(bk) >= 2: byb[bk].append(m)
+    for a in A:
+        if a["id"] in usedA: continue
+        bk = base(a["norm"])
+        if len(bk) < 2: continue
+        cs = [m for m in byb.get(bk, []) if m["id"] not in usedB]
+        if cs: take(a, cs[0], "cont")
     rem = lambda L, used: [x for x in L if x["id"] not in used]
     subA = collections.defaultdict(list); subB = collections.defaultdict(list)
     for a in rem(A, usedA): subA[a["sub"]].append(a)
