@@ -260,6 +260,10 @@ def finalize_events(nodes, links, years_main):
         if any(l["x"] for l in iv + ov): ev.add("cross")
         n["event"] = sorted(ev)
 
+# 같은 도시 통합(흡수교 학과가 본교 같은 소계열로 흡수): 이름 달라도 통합 연결.
+# 캠퍼스 분리 통합(강원-강릉원주)은 미포함 -> 이름 유사할 때만 통합(분리운영 보존).
+CO_LOCATED = {"경상국립대학교"}
+
 def build():
     recs = load("records.json")
     mergers = load("schools.json")["mergers"]   # absorbed -> {into, year}
@@ -286,7 +290,9 @@ def build():
         for n in nodes: n["first"], n["last"] = years[0], years[-1]
         bands = []
         absorbed_origin_targets = set()
-        ab_list = []   # (merge_year, 흡수밴드 norm 집합)
+        ab_list = []    # (merge_year, 흡수밴드 norm 집합)
+        colo_src = []   # (merge_year, 흡수밴드 마지막해 노드들)
+        colocated = school in CO_LOCATED   # 같은 도시 통합 -> 같은 소계열이면 이름 달라도 통합
 
         for ab, my in absorbed_of.get(school, []):
             if ab not in by_school: continue
@@ -308,16 +314,11 @@ def build():
                 if tgt is None:
                     cand = [m for m in main_my if "학부" in m["dept"] and len(a["norm"]) >= 2 and a["norm"] in m["norm"]]
                     if cand: tgt = cand[0]
-                if tgt is None:
-                    # 같은 소계열 인접분야 합병 추론 (컴퓨터공학->컴퓨터과학부 등)
-                    same = sorted([m for m in main_my if m["sub"] == a["sub"]],
-                                  key=lambda m: -jac(a["norm"], m["norm"]))
-                    if same and jac(a["norm"], same[0]["norm"]) >= 0.25:
-                        tgt = same[0]
                 if tgt is not None:
                     xlinks.append({"s": a["id"], "t": tgt["id"], "k": "merge", "x": 0, "xb": 1})
                     absorbed_origin_targets.add(tgt["id"])
             ab_list.append((my, {n["norm"] for n in bnodes}))
+            colo_src.append((my, last_ab))   # 같은-소계열 통합용(ghost 제거 후 처리)
             nodes += bnodes; links += blinks + xlinks
             deaths_ab = {str(y): bdeaths[y] for y in bdeaths}
             bands.append({"idx": len(bands) + 1, "name": ab, "year": my,
@@ -355,6 +356,24 @@ def build():
             if ghost:
                 nodes = [n for n in nodes if n["id"] not in ghost]
                 links = [l for l in links if l["s"] not in ghost and l["t"] not in ghost]
+
+        # 같은-소계열 통합(ghost 제거 후): 본교 통합연도 '신설' 학과 중 소계열이 흡수밴드에 있으면
+        # = 흡수학교 흡수 결과로 보고 band1 같은-소계열 학과에서 merge 유입(신설->통합).
+        # colocated(같은 도시)=이름무관, 그 외(캠퍼스 분리)=이름유사(>=0.3)일 때만(분리운영 보존).
+        if colo_src:
+            alive = {n["id"] for n in nodes}
+            has_inb = {l["t"] for l in links}
+            for my, last_ab in colo_src:
+                last_by_sub = collections.defaultdict(list)
+                for a in last_ab:
+                    if a["id"] in alive: last_by_sub[a["sub"]].append(a)
+                for m in nodes:
+                    if m["band"] != 0 or m["year"] != my or m["id"] in has_inb: continue
+                    srcs = sorted(last_by_sub.get(m["sub"], []), key=lambda a: -jac(a["norm"], m["norm"]))
+                    if not srcs: continue
+                    if colocated or jac(srcs[0]["norm"], m["norm"]) >= 0.3:
+                        links.append({"s": srcs[0]["id"], "t": m["id"], "k": "merge", "x": 0, "xb": 1})
+                        has_inb.add(m["id"])
 
         # id 재색인: 산출 인코더/렌더러가 링크 s/t를 노드 배열 index로 참조하므로 id==index 보장 필수
         idmap = {n["id"]: i for i, n in enumerate(nodes)}
