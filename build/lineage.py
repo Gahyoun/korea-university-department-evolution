@@ -238,7 +238,8 @@ def school_graph(yrmap, years, id0, band, gyodae=False):
                 j = setjac(d["cores"], b["cores"])
                 if j > bj: bj, best = j, b
             if best and bj >= 0.5: t = best
-        # (3) 같은 소계열 + 어간 접두 포함(단순 단어 첨삭): 축산생명학과 -> 축산학과
+        # (3) 같은 소계열 + 어간 접두 포함(단순 단어 첨삭): 축산생명학과->축산학과.
+        #     반드시 같은 소계열 안에서만 -> 경영학(경영학) vs 경영정보학(경영정보학)처럼 분야가 다른 건 소계열이 달라 제외됨.
         if t is None:
             sd = stem(d["norm"])
             best, bl = None, 0
