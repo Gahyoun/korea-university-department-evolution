@@ -54,6 +54,15 @@ def member_cores(members, unit):
 def setjac(a, b):
     return len(a & b) / len(a | b) if a and b else 0.0
 
+STEM_SYN = {"수리": "수학", "수리과학": "수학", "수리정보": "수학"}  # 동의어(수학<->수리)
+def stem(nm):
+    """핵심 어간: 학과/과학/공학/과/부 접미 제거. 1글자 코어는 보존."""
+    s = nm
+    for suf in ("과학", "공학", "학", "과", "부"):
+        if nm.endswith(suf) and len(nm) - len(suf) >= 2:
+            s = nm[:-len(suf)]; break
+    return STEM_SYN.get(s, s)
+
 def load(name):
     with open(os.path.join(ROOT, "data", name), encoding="utf-8") as f:
         return json.load(f)
@@ -129,9 +138,11 @@ def link_pair(A, B):
                 usedB.add(b["id"])
     for a in rem(A, usedA):
         if "학부" in a["dept"]:
+            # 학부명 안에 후속 학과의 어간이 포함되면 분리(기계항공및원자력공학부 -> 기계공학과+원자력공학과)
             cand = [b for b in rem(B, usedB) if b["broad"] == a["broad"] and len(b["norm"]) >= 2
-                    and "학부" not in b["dept"] and b["norm"] in a["norm"]]
-            if cand:
+                    and "학부" not in b["dept"]
+                    and (b["norm"] in a["norm"] or (len(stem(b["norm"])) >= 2 and stem(b["norm"]) in a["norm"]))]
+            if len(cand) >= 1:
                 for b in cand: links.append((a["id"], b["id"], "split")); usedB.add(b["id"])
                 usedA.add(a["id"])
     pairs = []
@@ -199,13 +210,6 @@ def school_graph(yrmap, years, id0, band, gyodae=False):
             has_in.add(n["id"]); has_out.add(src["id"])
     # 폐지 재판단: 후속 없는(사망) 노드를 이후 연도의 같은 소계열·어간(stem) 일치 신설 노드와 연결.
     # 원예학과->원예과학과 같은 명칭 진화(개명)를 이어 붙이고, 후속 데이터로 폐지 오분류를 교정.
-    STEM_SYN = {"수리": "수학", "수리과학": "수학", "수리정보": "수학"}  # 수학과<->수리과학과 등 동의어
-    def stem(nm):
-        s = nm
-        for suf in ("과학", "공학", "학", "과", "부"):
-            if nm.endswith(suf) and len(nm) - len(suf) >= 2:
-                s = nm[:-len(suf)]; break
-        return STEM_SYN.get(s, s)
     born_idx = collections.defaultdict(list)
     for n in nodes:
         if n["year"] != years[0] and n["id"] not in has_in:
@@ -234,7 +238,18 @@ def school_graph(yrmap, years, id0, band, gyodae=False):
                 j = setjac(d["cores"], b["cores"])
                 if j > bj: bj, best = j, b
             if best and bj >= 0.5: t = best
-        # (3) 소계열 유일: 같은 소계열 born 후보가 정확히 1개면 연속(수학과->수리데이터사이언스학과)
+        # (3) 같은 소계열 + 어간 접두 포함(단순 단어 첨삭): 축산생명학과 -> 축산학과
+        if t is None:
+            sd = stem(d["norm"])
+            best, bl = None, 0
+            for b in born_by_sub.get(d["sub"], []):
+                if b["year"] <= d["year"] or b["id"] in has_in or b["year"] - d["year"] > 5: continue
+                sb = stem(b["norm"])
+                if len(sd) >= 2 and len(sb) >= 2 and (sd.startswith(sb) or sb.startswith(sd)):
+                    pl = min(len(sd), len(sb))
+                    if pl > bl: bl, best = pl, b
+            if best: t = best
+        # (4) 소계열 유일: 같은 소계열 born 후보가 정확히 1개면 연속(수학과->수리데이터사이언스학과)
         if t is None:
             cands = [b for b in born_by_sub.get(d["sub"], [])
                      if b["year"] > d["year"] and b["id"] not in has_in and 0 < b["year"] - d["year"] <= 5]
@@ -330,8 +345,8 @@ def build():
             links = [l for l in links if not (l.get("xb") != 1 and l["k"] != "cont"
                                               and l["t"] in absorbed_origin_targets)]
 
-        # 통합 legacy 제거: 흡수밴드(band1)와 같은 이름인데 band0 등장이 통합 시점부터 시작(min>=통합-1)
-        # = 본교(band0)에 원래 없던 흡수학교 단독학과. 통합 후 존속해도 본교 band0에선 제거(흡수밴드로만 표시).
+        # 통합 legacy 제거: 흡수밴드(band1)와 같은 이름 + band0 등장이 [통합-1,통합]에만 있고 통합연도까지만(미존속)
+        # = 통합 직후 폐과된 순수 중복기재만 제거. 통합 후 존속하는 흡수학과는 계승으로 보고 유지(아래 colo에서 연결).
         if ab_list:
             byid2 = {n["id"]: n for n in nodes}
             adj = collections.defaultdict(set)
@@ -351,7 +366,7 @@ def build():
                         for y in adj[x]:
                             if y not in comp: comp.add(y); st.append(y)
                     yrs = [byid2[c]["year"] for c in comp]
-                    if min(yrs) >= my - 1:          # 본교에 통합 전 존재 이력 없음 -> 흡수학교 단독학과
+                    if min(yrs) >= my - 1 and max(yrs) <= my:   # 통합 직후 폐과된 순수 중복만 제거(존속=계승 유지)
                         ghost |= comp
             if ghost:
                 nodes = [n for n in nodes if n["id"] not in ghost]
