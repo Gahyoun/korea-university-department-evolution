@@ -39,6 +39,21 @@ def jac(a, b):
     A, B = bigrams(a), bigrams(b)
     return len(A & B) / len(A | B) if A and B else 0.0
 
+def member_cores(members, unit):
+    """학부 노드의 세부전공 집합(단위명 접두 제거 + 정규화). 학부 개명 판정용."""
+    cs = set()
+    for m in members:
+        c = m
+        if unit and c.startswith(unit):
+            c = c[len(unit):]
+        c = re.sub(r"[()]", " ", c).strip()
+        c = norm_name(c) if c else ""
+        if c:
+            cs.add(c)
+    return cs
+def setjac(a, b):
+    return len(a & b) / len(a | b) if a and b else 0.0
+
 def load(name):
     with open(os.path.join(ROOT, "data", name), encoding="utf-8") as f:
         return json.load(f)
@@ -80,6 +95,16 @@ def link_pair(A, B):
         cs = [m for m in byb.get(bk, []) if m["id"] not in usedB]
         if cs: take(a, cs[0], "cont")
     rem = lambda L, used: [x for x in L if x["id"] not in used]
+    # 2.6) 세부전공 과반 일치 -> 같은 단위 개명/통합 (나노·신소재공학부 -> 신소재공학부)
+    for a in sorted([x for x in A if x["id"] not in usedA and len(x["cores"]) >= 2],
+                    key=lambda x: -len(x["cores"])):
+        best, bj = None, 0.0
+        for b in B:
+            if b["id"] in usedB or len(b["cores"]) < 2: continue
+            j = setjac(a["cores"], b["cores"])
+            if j > bj: bj, best = j, b
+        if best and bj >= 0.5:
+            take(a, best, "cont")
     subA = collections.defaultdict(list); subB = collections.defaultdict(list)
     for a in rem(A, usedA): subA[a["sub"]].append(a)
     for b in rem(B, usedB): subB[b["sub"]].append(b)
@@ -144,6 +169,7 @@ def school_graph(yrmap, years, id0, band, gyodae=False):
             if r["mid"]: nd["mid_cnt"][r["mid"]] += 1
         for nd in agg.values():
             nd["members"] = sorted(set(nd["members"])); nd["msz"] = len(nd["members"])
+            nd["cores"] = member_cores(nd["members"], nd["dept"])
             # 학부 집계 노드의 소/중계열 = 멤버 다수결(N.C.E/빈값 제외 우선)
             def pick(cnt):
                 good = [(c, s) for s, c in cnt.items() if s not in ("N.C.E", "N.C.E.")]
@@ -184,14 +210,37 @@ def school_graph(yrmap, years, id0, band, gyodae=False):
     for n in nodes:
         if n["year"] != years[0] and n["id"] not in has_in:
             born_idx[(n["sub"], stem(n["norm"]))].append(n)
+    # 소계열별 born 목록(유일 학과 판정용)
+    born_by_sub = collections.defaultdict(list)
+    for n in nodes:
+        if n["year"] != years[0] and n["id"] not in has_in:
+            born_by_sub[n["sub"]].append(n)
     for d in sorted((n for n in nodes if n["year"] != years[-1] and n["id"] not in has_out),
                     key=lambda n: n["year"]):
         if d["id"] in has_out:
             continue
+        t = None
+        # (1) 어간(stem) 일치
         cands = [b for b in born_idx.get((d["sub"], stem(d["norm"])), [])
                  if b["year"] > d["year"] and b["id"] not in has_in and 0 < b["year"] - d["year"] <= 5]
         if cands:
             t = min(cands, key=lambda b: b["year"])
+        # (2) 세부전공 과반 일치(학부 개명, gap)
+        if t is None and len(d["cores"]) >= 2:
+            best, bj = None, 0.0
+            for b in born_by_sub.get(d["sub"], []):
+                if b["year"] <= d["year"] or b["id"] in has_in or b["year"] - d["year"] > 5: continue
+                if len(b["cores"]) < 2: continue
+                j = setjac(d["cores"], b["cores"])
+                if j > bj: bj, best = j, b
+            if best and bj >= 0.5: t = best
+        # (3) 소계열 유일: 같은 소계열 born 후보가 정확히 1개면 연속(수학과->수리데이터사이언스학과)
+        if t is None:
+            cands = [b for b in born_by_sub.get(d["sub"], [])
+                     if b["year"] > d["year"] and b["id"] not in has_in and 0 < b["year"] - d["year"] <= 5]
+            if len(cands) == 1:
+                t = cands[0]
+        if t is not None:
             links.append({"s": d["id"], "t": t["id"], "k": "soft",
                           "x": 1 if d["broad"] != t["broad"] else 0})
             has_out.add(d["id"]); has_in.add(t["id"])
@@ -317,7 +366,7 @@ def build():
 
         # cleanup working fields
         for n in nodes:
-            for k in ("stev", "dcode", "norm", "first", "last"): n.pop(k, None)
+            for k in ("stev", "dcode", "norm", "first", "last", "cores"): n.pop(k, None)
 
         # 활성 수는 최종(ghost 제거 후) band0 노드 기준으로 재계산
         nayb = collections.Counter(n["year"] for n in nodes if n["band"] == 0)
