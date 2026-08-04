@@ -108,7 +108,21 @@
     연도 간 연결(연속·통합·분리)은 학과코드(2022년 이후)와 명칭·소계열에 기반한 추정이며, 코드가 없는 2021년 이전은 명칭 기반 추정입니다.
     분류·통합 처리는 정규화와 추정을 포함하므로 실제와 다를 수 있습니다.
     &nbsp;·&nbsp; 데이터 처리·시각화 by <a class="inl" href="https://github.com/Gahyoun" target="_blank" rel="noopener">@dotch_gahyoun</a>.
+    <div class="mini" style="margin-top:6px" id="ver">
+      <a class="inl" href="https://github.com/Gahyoun/korea-university-department-evolution/blob/main/docs/METHODOLOGY.md" target="_blank" rel="noopener">방법론</a> ·
+      <a class="inl" href="https://github.com/Gahyoun/korea-university-department-evolution/blob/main/docs/SCHEMA.md" target="_blank" rel="noopener">데이터 스키마</a> ·
+      <a class="inl" href="https://github.com/Gahyoun/korea-university-department-evolution" target="_blank" rel="noopener">소스</a>
+    </div>
   </footer>
 </div>
+<script>
+  // 정적 데이터 API 매니페스트 -> 데이터 버전·빌드일 표기
+  fetch("manifest.json", {cache: "no-cache"}).then(r => r.json()).then(m => {
+    const el = document.getElementById("ver");
+    const d = (m.built_at || "").slice(0, 10);
+    el.insertAdjacentHTML("afterbegin",
+      `데이터 v${m.data_version} · 빌드 ${d} · ${m.stats.schools}개교 · ${m.source.coverage_years[0]}–${m.source.coverage_years[1]} &nbsp;·&nbsp; `);
+  }).catch(() => {});
+</script>
 </body>
 </html>

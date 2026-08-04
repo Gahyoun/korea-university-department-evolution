@@ -1,0 +1,56 @@
+{
+  "schema_version": "1.0",
+  "data_version": "2026.08.04",
+  "built_at": "2026-08-04T06:50:03+00:00",
+  "git_commit": null,
+  "source": {
+    "name": "대학알리미 학교별 학부(과) 리스트",
+    "url": "https://www.academyinfo.go.kr",
+    "coverage_years": [
+      2014,
+      2026
+    ]
+  },
+  "generator": {
+    "python": "3.11.7",
+    "numpy": "1.26.4",
+    "openpyxl": "3.1.5",
+    "kiwipiepy": "0.23.2"
+  },
+  "pipeline": [
+    "normalize",
+    "lineage",
+    "build_alluvial",
+    "build_namesplit",
+    "build_keywords"
+  ],
+  "stats": {
+    "schools": 209,
+    "active_dept_records": 120473,
+    "namesplit_subs": 144,
+    "years": [
+      2014,
+      2015,
+      2016,
+      2017,
+      2018,
+      2019,
+      2020,
+      2021,
+      2022,
+      2023,
+      2024,
+      2025,
+      2026
+    ],
+    "excluded": {
+      "무전공": 3586,
+      "교양": 4287,
+      "모집단위": 4721
+    }
+  },
+  "fingerprints": {
+    "alluvial": "5f4906cdd3e1",
+    "namesplit": "b1735d64d6ea"
+  }
+}

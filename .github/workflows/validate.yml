@@ -1,0 +1,19 @@
+name: validate-data
+# 데이터 계약 회귀 방지: 커밋된 out/ JSON의 무결성을 검증 (원본 데이터 불필요, stdlib만).
+on:
+  push:
+    branches: [main]
+    paths: ["alluvial/**", "namesplit/**", "manifest.json", "build/validate.py"]
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Validate data contract
+        run: python build/validate.py --full

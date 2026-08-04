@@ -1,0 +1,5 @@
+# 재현 빌드용 고정 의존성 (Python 3.11)
+# 런타임(프론트)은 의존성 0 — 아래는 오프라인 ETL 빌드에만 필요.
+numpy==1.26.4
+openpyxl==3.1.5      # 원본 xlsx 파싱 (normalize)
+kiwipiepy==0.23.2    # 학과명 명사 추출 (build_keywords)

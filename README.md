@@ -16,42 +16,40 @@
 | [`namesplit.html`](namesplit.html) | **소계열 학과명 분화 Alluvial** — 대계열▸중계열▸소계열 계층 선택 → 전국 대학에서 학과 "이름"이 어떻게 이어지고 갈라지는지. 노드=명칭, 크기=학교 수. 상단에 계열 학과 수 증감 스트립. |
 | [`keywords.html`](keywords.html) | **학과명 키워드 Temporal** — 신설/활성 학과명 키워드의 연도별 버블 + 급상승 랭킹(융합·AI·반도체·스마트…). |
 
-## 방법론 (핵심)
+## 아키텍처
 
-**대상**: 4년제 일반대 + 교육대 (+기간 중 전환된 산업대). 사이버·방송통신·각종학교 제외.
+읽기 전용 분석 데이터셋 → **서버·DB 없는 정적 데이터 API**가 정답인 구조.
 
-**활성 학과 기준**: 학과상태에서 `폐지/폐과` 제외. 신입생을 유효하게 받는 학과만 카운트.
-
-**제외**: 무전공/자유·자율전공/광역·계열모집, 교양대학·교양학부·기초교육, 1학년전용.
-
-**학부 단위 집계**: `OO학부 XX전공` 형태는 학부(`OO학부`)로 묶어 한 노드 — 노드 크기 = 소속 전공 수.
-이로써 여러 학과가 한 학부로 묶이면 **통합(노드 굵어짐)**, 학부가 학과로 갈라지면 **분리**로 읽힌다.
-
-**연도간 연결**: 학교별학과코드(2022+)·정규화 학과명 동일 = 연속(cont), 상태 통합/분리 및
-학부 명칭 포함 = 통합/분리, 같은 소계열 + 이름 유사 = 재편/개명(soft).
-
-**국립대 명칭변경 vs 학교통합**
-- 국립화 명칭변경(`OO대→국립OO대`, 안동대→국립경국대)은 **학교코드로 동일학교** 취급(이벤트 없음).
-- **학교 간 통합만** 별도 표기: 경상국립대(=경상대+경남과기대, 2022), 강원대(+국립강릉원주대, 2026).
-  흡수된 학교는 하단 밴드로 그리고, 통합연도에 본교로 합류하는 **학교통합 링크**로 연결.
-
-## 재현
-
-원본 xlsx는 용량상 미포함(대학알리미 공개자료). `<연도>.xlsx`(2014–2026)를 루트에 두면:
-
-```bash
-pip install numpy openpyxl kiwipiepy
-python build/normalize.py        # -> data/records.json, schools.json, summary.json
-python build/lineage.py          # -> data/lineage.json (학부집계·통폐합·밴드)
-python build/build_alluvial.py   # -> alluvial.html + alluvial/*.json
-python build/build_keywords.py   # -> keywords.html (데이터 임베드)
+```
+원본 xlsx (2014–2026)                 [비공개, 로컬]
+        │  오프라인 ETL (Python, 결정론적)
+        ▼
+build/normalize → lineage → build_*    [백엔드 = 빌드 파이프라인]
+        │
+        ▼
+out/  alluvial/<학교>.json · namesplit/<소계열>.json · manifest.json   [버전드 정적 데이터]
+        │  GitHub Pages CDN (gzip · 무한 캐시 · 운영비 0)
+        ▼
+alluvial.html · namesplit.html · keywords.html   [얇은 렌더링 클라이언트, 런타임 의존성 0]
 ```
 
-로컬 미리보기(파일 fetch 때문에 서버 필요):
+- **효율적 데이터 이동**: 전 데이터를 한 번에 싣지 않고, 선택한 학교/소계열 JSON만 **지연 로드**(`fetch`, `no-cache`로 배포 후 stale 방지). 노드/링크는 배열(위치 기반)로 인코딩해 크기 최소화.
+- **버저닝**: [`manifest.json`](manifest.json) — 데이터 버전·빌드일·툴 버전·통계·내용 지문. 프론트가 읽어 표기.
+- **데이터 계약**: [`docs/SCHEMA.md`](docs/SCHEMA.md) — 뷰어↔빌드 JSON 스키마.
+- **처리 기준(재현성)**: [`docs/METHODOLOGY.md`](docs/METHODOLOGY.md) — 필터·정규화·계보 추론·통합 처리의 전 규칙.
+- **CI**: 푸시 시 [`build/validate.py`](build/validate.py)가 배포물 JSON 계약(링크 범위·밴드 참조 등)을 검증.
+
+## 재현 빌드
+
+원본 `<연도>.xlsx`(2014–2026, [대학알리미](https://www.academyinfo.go.kr) 공개자료)를 루트에 두고:
 
 ```bash
-python -m http.server 8800   # http://localhost:8800/
+make deps      # pip install -r requirements.txt (빌드 전용; 런타임은 의존성 0)
+make all       # normalize → lineage → build_* → manifest → validate
+make serve     # http://localhost:8800  (로컬 미리보기)
 ```
+
+개별 단계·규칙은 [`docs/METHODOLOGY.md`](docs/METHODOLOGY.md), 산출 스키마는 [`docs/SCHEMA.md`](docs/SCHEMA.md) 참조.
 
 ## 데이터 출처 / 면책
 
