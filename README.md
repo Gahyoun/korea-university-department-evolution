@@ -37,7 +37,10 @@ alluvial.html · namesplit.html · keywords.html   [얇은 렌더링 클라이�
 - **버저닝**: [`manifest.json`](manifest.json) — 데이터 버전·빌드일·툴 버전·통계·내용 지문. 프론트가 읽어 표기.
 - **데이터 계약**: [`docs/SCHEMA.md`](docs/SCHEMA.md) — 뷰어↔빌드 JSON 스키마.
 - **처리 기준(재현성)**: [`docs/METHODOLOGY.md`](docs/METHODOLOGY.md) — 필터·정규화·계보 추론·통합 처리의 전 규칙.
-- **CI**: 푸시 시 [`build/validate.py`](build/validate.py)가 배포물 JSON 계약(링크 범위·밴드 참조 등)을 검증.
+- **CI**: 푸시 시 [`build/validate.py`](build/validate.py)가 배포물 JSON 계약(링크 범위·밴드 참조 등)을 검증(`validate-data`).
+- **연간 자동 재빌드·배포**([`annual-build-deploy`](.github/workflows/annual-build.yml)): 매년 3월 cron + 수동 실행.
+  원본 xlsx는 저장소에 없으므로 **`RAW_DATA_URL` 시크릿**(20XX.xlsx zip 다운로드 주소)에서 받아 `make` 후
+  결과를 `main`에 커밋 → Pages 자동 재배포. 시크릿 미설정 시 명확히 실패(수동 실행 시 URL 직접 입력 가능).
 
 ## 재현 빌드
 

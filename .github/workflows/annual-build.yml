@@ -1,0 +1,75 @@
+name: annual-build-deploy
+# 연 1회 데이터 재빌드·재배포. 대학알리미 신규 공시(보통 2~3월) 반영.
+# 원본 xlsx는 저장소에 없으므로(용량) RAW_DATA_URL 시크릿(또는 수동 입력)의 zip에서 받는다.
+#   RAW_DATA_URL = "20XX.xlsx ~ 20YY.xlsx 를 담은 zip" 의 직접 다운로드 URL
+# 수동 실행: Actions ▸ annual-build-deploy ▸ Run workflow (raw_data_url 입력 가능)
+on:
+  schedule:
+    - cron: "0 0 15 3 *"        # 매년 3월 15일 00:00 UTC
+  workflow_dispatch:
+    inputs:
+      raw_data_url:
+        description: "원본 xlsx zip 다운로드 URL (미입력 시 RAW_DATA_URL 시크릿)"
+        required: false
+
+permissions:
+  contents: write               # 재빌드 결과를 main에 커밋 -> Pages 자동 재배포
+
+concurrency:
+  group: annual-build
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: pip
+
+      - name: Fetch raw data
+        env:
+          URL: ${{ github.event.inputs.raw_data_url || secrets.RAW_DATA_URL }}
+        run: |
+          if [ -z "$URL" ]; then
+            echo "::error title=원본 데이터 없음::RAW_DATA_URL 시크릿을 설정하거나 수동 실행 시 raw_data_url 을 입력하세요 (20XX.xlsx zip)."
+            exit 1
+          fi
+          curl -fsSL "$URL" -o raw.zip
+          unzip -o raw.zip -d .          # 루트에 20XX.xlsx 들이 풀리도록
+          echo "받은 원본:"; ls -1 *.xlsx
+
+      - name: Install build deps
+        run: pip install -r requirements.txt
+
+      - name: Build data (ETL)
+        run: |
+          python build/normalize.py
+          python build/lineage.py
+          python build/build_alluvial.py
+          python build/build_namesplit.py
+          python build/build_keywords.py
+          GIT_COMMIT="${GITHUB_SHA::7}" python build/make_manifest.py
+
+      - name: Publish to repo root (배포 레이아웃)
+        run: |
+          rm -rf alluvial namesplit
+          cp -r out/alluvial out/namesplit .
+          cp out/*.html out/manifest.json .
+
+      - name: Validate data contract
+        run: python build/validate.py --full
+
+      - name: Commit & deploy
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add alluvial namesplit *.html manifest.json
+          if git diff --cached --quiet; then
+            echo "데이터 변경 없음 — 커밋 생략"; exit 0
+          fi
+          git commit -m "chore(data): 연간 자동 재빌드 $(date -u +%Y-%m-%d)"
+          git push                        # push -> Pages 자동 재배포
