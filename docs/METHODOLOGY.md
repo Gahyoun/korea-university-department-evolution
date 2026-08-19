@@ -13,9 +13,10 @@
 ## 0. 파이프라인
 
 ```
+extract_faculty.py → data/faculty.json  교수(전임교원) 조인 테이블 (외부 parquet, pandas)
 normalize.py  → data/records.json     정규화·필터링된 (연도,학교,학과) 레코드
-lineage.py    → data/lineage.json     학교별 학부집계 + 계보 링크 + 통합 밴드
-build_alluvial.py  → out/alluvial/    학교별 계보(뷰어 데이터)
+lineage.py    → data/lineage.json     학교별 학부집계 + 계보 링크 + 통합 밴드 + 노드별 교수 수
+build_alluvial.py  → out/alluvial/    학교별 계보(뷰어 데이터) + alluvial.html / faculty.html
 build_namesplit.py → out/namesplit/   소계열별 명칭 분화
 build_keywords.py  → out/keywords.html 키워드 temporal (데이터 임베드)
 make_manifest.py   → out/manifest.json 버전/메타
@@ -135,6 +136,16 @@ validate.py        → (검증 게이트)
 `신설/활성` × `대계열(전체+5)` 별 키워드 연도 빈도, 초기3년 대비 최근3년 빈도차로 급상승 랭킹.
 
 ---
+
+## 10. 교수 수 계보 (`faculty.html`)
+
+학과 계보 alluvial의 **노드 높이를 전임교원(교수) 수**로 본다. `alluvial.html`(높이=전공/학과 수)과
+동일 데이터를 공유하고 크기 기준만 다르다(하나의 템플릿, `SIZE_MODE`).
+
+- **원천**: 자매 프로젝트 [how-large-academic-departments-korea](https://github.com/Gahyoun/korea-university-department-evolution/tree/main/how-large-academic-departments-korea)(arXiv:2607.22189)의 처리 산출물 `master_2015_2025.parquet`(대학알리미 *전체 교원 대비 전임교원 현황*). `ft`=전임교원 수.
+- **조인**(`extract_faculty.py` → `data/faculty.json`, `lineage.fac_lookup`): 교원 데이터는 **캠퍼스별**(`_제N캠퍼스`, `(…)`), 학과 데이터는 본교 기준 → **본교명(sbase)** 으로 캠퍼스 합산, `국립` 접두·가운뎃점 정규화, 학과명 + 마지막 토큰(단과대학 접두 제거) + 학부 접두 합산으로 매칭. 노드 ft = 멤버 전공 합.
+- **범위**: 2015–2025(교원 데이터 연도). faculty.html은 이 연도만 표시.
+- **계보 전파(`propagate_faculty`)**: 관측 ft를 계보(cont/merge/split, 학교통합 제외) 따라 흘려 미매칭 노드를 채운다 — **분할=선행 ft/선행 out차수 배분, 통합=유입 합**. 전신학과의 교수 규모가 개명·분리·통합을 통해 계승되는 것을 보이게 함. 채운 값은 `fte=1`(계보추정), 관측은 `0`, 끝까지 미상은 `null`(회색). 대략 관측 80% · 추정 8% · 미상 12%.
 
 ## 면책
 

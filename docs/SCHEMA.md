@@ -31,17 +31,19 @@
 ```jsonc
 { "school": "경상국립대학교",
   "years": [2014, …, 2026],
-  "nodes": [ [year, dept, sub, broad, msz, evcode, members, band], … ],
+  "nodes": [ [year, dept, sub, broad, msz, evcode, members, band, ft, fte], … ],
   "links": [ [s, t, kind, cross, crossBand], … ],
   "deaths": { "2021": [ { "dept": "…", "broad": "…" } ] },
   "bands":  [ { "idx": 1, "name": "경남과학기술대학교", "year": 2022,
                "years": [2014, …, 2021], "deaths": {…}, "n_active_by_year": {…} } ],
   "base2014": 95 }
 ```
-**node** = `[year:int, dept:str, sub:str, broad:str, msz:int, evcode:int, members:str[], band:int]`
+**node** = `[year, dept, sub, broad, msz, evcode, members, band, ft, fte]`
 - `evcode` 비트: `1`신설 `2`통합 `4`분리 `8`폐지 `16`대계열이동
 - `band`: `0`=본교, `≥1`=흡수 학교(= `bands[band-1]`)
 - `members`: 학부 소속 전공(≥2개일 때만), 그 외 `[]`
+- `ft`: 전임교원(교수) 수(2015–2025). 미상=`null`. **faculty.html에서 노드 높이**
+- `fte`: ft 출처 — `0`관측 / `1`계보추정(전신학과 계승·분할) / `null`미상. (alluvial.html은 msz 사용, ft/fte 무시)
 
 **link** = `[s:int, t:int, kind:int, cross:int, crossBand:int]`
 - `s`,`t`: **노드 배열 인덱스**(= id, `id==index` 보장). 링크는 `nodes[s] → nodes[t]`

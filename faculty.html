@@ -47,7 +47,7 @@
 </head>
 <body>
 <header>
-  <div><a class="home" href="index.html">← 메인페이지</a><h1>학과 계보 Alluvial</h1><div class="sub">2014 기준 · 통합·분리·신설·폐지 · 노드 높이=전공/학과 수 · 대학알리미</div></div>
+  <div><a class="home" href="index.html">← 메인페이지</a><h1>학과 계보 · 교수 수</h1><div class="sub">노드 높이=전임교원(교수) 수 · 2015–2025 · 회색=교수수 미상 · 대학알리미/how-large-academic-departments</div></div>
   <select id="school"></select>
   <select id="broad">
     <option value="ALL">대계열: 전체</option>
@@ -73,7 +73,7 @@ function subColor(s){return `hsl(${hashHue(s)},50%,60%)`;}
 let INDEX=null, DATA=null, selBroad="ALL";
 const NODEW=13, COLGAP=160, PADTOP=50, PADL=70, GAP=2, BANDGAP=64, COLTARGET=1250;
 // 노드 높이(폭) 기준: 'msz'=전공/학과 수, 'ft'=전임교원(교수) 수
-const SIZE_MODE="msz";
+const SIZE_MODE="ft";
 function SZ(n){ return SIZE_MODE==="ft" ? n[8] : n[4]; }         // 원값(ft는 null 가능=미상)
 function SZv(n){ const v=SZ(n); return (v==null)?0.5:v; }         // 렌더용 수치(미상=최소)
 function ftNull(n){ return SIZE_MODE==="ft" && n[8]==null; }

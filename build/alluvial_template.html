@@ -47,7 +47,7 @@
 </head>
 <body>
 <header>
-  <div><a class="home" href="index.html">← 메인페이지</a><h1>학과 계보 Alluvial</h1><div class="sub">2014 기준 · 통합·분리·신설·폐지 · 노드 크기=전공/학과 수 · 대학알리미</div></div>
+  <div><a class="home" href="index.html">← 메인페이지</a><h1>__PAGE_TITLE__</h1><div class="sub">__PAGE_SUB__</div></div>
   <select id="school"></select>
   <select id="broad">
     <option value="ALL">대계열: 전체</option>
@@ -72,6 +72,11 @@ function subColor(s){return `hsl(${hashHue(s)},50%,60%)`;}
 
 let INDEX=null, DATA=null, selBroad="ALL";
 const NODEW=13, COLGAP=160, PADTOP=50, PADL=70, GAP=2, BANDGAP=64, COLTARGET=1250;
+// 노드 높이(폭) 기준: 'msz'=전공/학과 수, 'ft'=전임교원(교수) 수
+const SIZE_MODE="__SIZE_MODE__";
+function SZ(n){ return SIZE_MODE==="ft" ? n[8] : n[4]; }         // 원값(ft는 null 가능=미상)
+function SZv(n){ const v=SZ(n); return (v==null)?0.5:v; }         // 렌더용 수치(미상=최소)
+function ftNull(n){ return SIZE_MODE==="ft" && n[8]==null; }
 
 async function boot(){
   try{ INDEX=await (await fetch("alluvial/_index.json",{cache:"no-cache"})).json(); }
@@ -79,7 +84,10 @@ async function boot(){
     $("err").innerHTML="데이터 로드 실패 (file://는 fetch 차단). <b>out</b> 폴더에서<br><br><code>python3 -m http.server 8800</code><br><br>실행 후 <code>http://localhost:8800/alluvial.html</code> 접속."; return; }
   const sel=$("school");
   INDEX.schools.forEach(s=>{const o=document.createElement("option");o.value=s.file;
-    o.textContent=`${s.school} · 2014:${s.base}→현재:${s.cur}`+(s.trib.length?` · ▼통합 ${s.trib.join(",")}`:"");
+    o.textContent = (SIZE_MODE==="ft"
+        ? `${s.school} · 교수 ${s.ftcur||0}명`
+        : `${s.school} · 2014:${s.base}→현재:${s.cur}`)
+      + (s.trib.length?` · ▼통합 ${s.trib.join(",")}`:"");
     sel.appendChild(o);});
   sel.onchange=()=>load(sel.value);
   $("broad").onchange=()=>{selBroad=$("broad").value; layout(); render();};
@@ -92,7 +100,7 @@ async function boot(){
 }
 async function load(file){ DATA=await (await fetch(file,{cache:"no-cache"})).json(); buildLegend(); layout(); render(); buildInfo(); }
 
-function visN(n){ return selBroad==="ALL" || n[3]===selBroad; }
+function visN(n){ return (selBroad==="ALL" || n[3]===selBroad) && yearOK(n[0]); }
 function softOn(){ return $("softchk").checked; }
 function visL(l){ if(l[2]===3 && !softOn()) return false; return visN(DATA.nodes[l[0]]) && visN(DATA.nodes[l[1]]); }
 
@@ -115,9 +123,10 @@ function buildInfo(){
 
 // ---------- layout (밴드 적층) ----------
 let POS=null, PPU=1, VYEARS=[], BANDLAY=[];
+function yearOK(y){ return SIZE_MODE!=="ft" || (y>=2015 && y<=2025); }  // 교수데이터 범위
 function layout(){
   const N=DATA.nodes;
-  VYEARS=DATA.years.slice(); const yidx={}; VYEARS.forEach((y,i)=>yidx[y]=i);
+  VYEARS=DATA.years.filter(yearOK); const yidx={}; VYEARS.forEach((y,i)=>yidx[y]=i);
   const bandIds=[...new Set(N.map(n=>n[7]))].sort((a,b)=>a-b);
   // same-band adjacency
   const fwd={},bwd={};
@@ -127,7 +136,7 @@ function layout(){
   const xbTargets=new Set(); DATA.links.forEach(l=>{ if(l[4]===1) xbTargets.add(l[1]); });
   // global PPU: tallest band-year column
   const cellSum={};
-  N.forEach((n,i)=>{ if(!visN(n))return; const k=n[7]+"|"+n[0]; cellSum[k]=(cellSum[k]||0)+n[4]; });
+  N.forEach((n,i)=>{ if(!visN(n))return; const k=n[7]+"|"+n[0]; cellSum[k]=(cellSum[k]||0)+SZv(n); });
   let maxsum=1; for(const k in cellSum) maxsum=Math.max(maxsum,cellSum[k]);
   PPU=Math.max(3.0, Math.min(46, COLTARGET/maxsum));
 
@@ -141,7 +150,7 @@ function layout(){
     yrs.forEach(y=>byear[y].sort((a,b)=>(N[a][2]||"").localeCompare(N[b][2]||"")||N[a][1].localeCompare(N[b][1])));
     const ord={}; const reidx=()=>yrs.forEach(y=>byear[y].forEach((id,k)=>ord[id]=k)); reidx();
     const bary=(id,adj)=>{const a=adj[id]; if(!a||!a.length)return null; let s=0,w=0;
-      a.forEach(x=>{if(ord[x]===undefined)return; const m=N[x][4]; s+=ord[x]*m; w+=m;}); return w?s/w:null;};
+      a.forEach(x=>{if(ord[x]===undefined)return; const m=SZv(N[x]); s+=ord[x]*m; w+=m;}); return w?s/w:null;};
     for(let it=0; it<8; it++){ const dir=it%2===0;
       const seq=dir?yrs.slice(1):yrs.slice(0,-1).reverse();
       seq.forEach(y=>{ const adj=dir?bwd:fwd;
@@ -153,7 +162,7 @@ function layout(){
     }
     // assign y within band
     let bandH=0;
-    yrs.forEach(y=>{ let yy=yBase; byear[y].forEach(id=>{ const h=Math.max(3,N[id][4]*PPU);
+    yrs.forEach(y=>{ let yy=yBase; byear[y].forEach(id=>{ const h=Math.max(3,SZv(N[id])*PPU);
       POS[id]={x:PADL+yidx[y]*COLGAP, y:yy, h, band:bid}; yy+=h+GAP; }); bandH=Math.max(bandH,yy-yBase); });
     const meta={bid, y0:yBase, h:bandH, name: bid===0? DATA.school : (DATA.bands[bid-1]?DATA.bands[bid-1].name:""),
                 year: bid===0? null : (DATA.bands[bid-1]?DATA.bands[bid-1].year:null),
@@ -166,7 +175,7 @@ function layout(){
 
 // ---------- render ----------
 let baseW,baseH,view=null;
-function nodeFill(n){ return selBroad==="ALL" ? "var(--node)" : subColor(n[2]); }
+function nodeFill(n){ if(ftNull(n)) return "#3a3f4a"; return selBroad==="ALL" ? "var(--node)" : subColor(n[2]); }
 function render(){
   const svg=$("svg"); svg.innerHTML=""; const N=DATA.nodes;
   const W=PADL+(VYEARS.length-1)*COLGAP+260, H=POS._maxH+20; baseW=W; baseH=H;
@@ -181,8 +190,9 @@ function render(){
     t.textContent=`▼ 흡수통합: ${b.name} → ${b.year}년`; svg.appendChild(t);});
   // per-band per-year count under header (band0) and small caption
   const b0=BANDLAY.find(b=>b.bid===0);
-  if(b0) VYEARS.forEach((y,i)=>{const col=b0.cols[y]||[]; let s=0; col.forEach(id=>s+=N[id][4]);
-    const c=el("text",{class:"ycount",x:PADL+i*COLGAP+NODEW/2,y:38}); c.textContent=`${col.length}·${s}`; svg.appendChild(c);});
+  if(b0) VYEARS.forEach((y,i)=>{const col=b0.cols[y]||[]; let s=0; col.forEach(id=>s+=SZv(N[id]));
+    const c=el("text",{class:"ycount",x:PADL+i*COLGAP+NODEW/2,y:38});
+    c.textContent=SIZE_MODE==="ft"?`${col.length}과·${Math.round(s)}명`:`${col.length}·${s}`; svg.appendChild(c);});
   // degrees
   const outs={},ins={};
   DATA.links.forEach(l=>{ if(l[4]!==1 && !visL(l))return; if(l[4]===1 && l[2]===3 && !softOn())return;
@@ -190,7 +200,7 @@ function render(){
     (outs[l[0]]=outs[l[0]]||[]).push(l); (ins[l[1]]=ins[l[1]]||[]).push(l); });
   const lg=el("g",{}); svg.appendChild(lg);
   function linkW(l){const A=N[l[0]],B=N[l[1]];
-    const oS=A[4]/Math.max(1,(outs[l[0]]||[]).length), iS=B[4]/Math.max(1,(ins[l[1]]||[]).length);
+    const oS=SZv(A)/Math.max(1,(outs[l[0]]||[]).length), iS=SZv(B)/Math.max(1,(ins[l[1]]||[]).length);
     return Math.max(1.4, Math.min(oS,iS)*PPU);}
   Object.values(outs).forEach(a=>a.sort((p,q)=>(POS[p[1]]?POS[p[1]].y:0)-(POS[q[1]]?POS[q[1]].y:0)));
   Object.values(ins).forEach(a=>a.sort((p,q)=>(POS[p[0]]?POS[p[0]].y:0)-(POS[q[0]]?POS[q[0]].y:0)));
@@ -228,12 +238,14 @@ function render(){
   const ng=el("g",{}); svg.appendChild(ng);
   DATA.nodes.forEach((n,i)=>{ const p=POS[i]; if(!p)return; const c=n[5];
     const g=el("g",{}); g.dataset.id=i;
-    g.appendChild(el("rect",{x:p.x,y:p.y,width:NODEW,height:p.h,fill:nodeFill(n),rx:2}));
+    const est = SIZE_MODE==="ft" && n[9]===1;   // 계보추정 ft
+    g.appendChild(el("rect",{x:p.x,y:p.y,width:NODEW,height:p.h,fill:nodeFill(n),rx:2,
+      "fill-opacity":est?0.5:1}));
     if(c&1) g.appendChild(el("rect",{x:p.x-2.5,y:p.y,width:2.5,height:p.h,fill:"var(--new)"}));
     if(c&8) g.appendChild(el("rect",{x:p.x+NODEW,y:p.y,width:2.5,height:p.h,fill:"var(--dead)"}));
     if(c&2) g.appendChild(el("rect",{x:p.x-0.6,y:p.y-0.6,width:NODEW+1.2,height:p.h+1.2,fill:"none",stroke:"var(--merge)","stroke-width":1.4,rx:2}));
     if(c&4) g.appendChild(el("rect",{x:p.x-0.6,y:p.y-0.6,width:NODEW+1.2,height:p.h+1.2,fill:"none",stroke:"var(--split)","stroke-width":1.4,rx:2}));
-    if(p.h>=8 || (single && p.h>=6)){ const big=n[4]>=2;
+    if(p.h>=8 || (single && p.h>=6)){ const big=SZv(n)>=2;
       const t=el("text",{class:"nlabel"+(big?" big":""),x:p.x+NODEW+4,y:p.y+p.h/2});
       const lim=single?22:14; t.textContent=n[1].length>lim?n[1].slice(0,lim)+"…":n[1]; g.appendChild(t);}
     g.addEventListener("mouseenter",e=>showTip(e,i)); g.addEventListener("mousemove",moveTip); g.addEventListener("mouseleave",hideTip);
@@ -249,7 +261,8 @@ function showTip(e,i){ const n=DATA.nodes[i], t=$("tip");
   let ev=EVB.filter(b=>n[5]&b[0]).map(b=>`<span class="badge" style="background:var(--${b[1]},#888)">${b[2]}</span>`).join("");
   let mem=(n[6]&&n[6].length>1)?`<div class="mem">전공 ${n[6].length}: `+n[6].join(" / ")+`</div>`:"";
   let bnd=n[7]!==0?` <span style="color:var(--school)">[${(DATA.bands[n[7]-1]||{}).name||""}]</span>`:"";
-  t.innerHTML=`<div class="d">${n[1]}${bnd}</div><div class="m">${n[0]}년 · ${n[3]} › ${n[2]} · 단위 ${n[4]}</div>${ev?`<div>${ev}</div>`:""}${mem}`;
+  const ftt = n[8]==null ? "교수 미상" : `교수 ${n[8]}명${n[9]===1?"(계보추정)":""}`;
+  t.innerHTML=`<div class="d">${n[1]}${bnd}</div><div class="m">${n[0]}년 · ${n[3]} › ${n[2]} · 전공 ${n[4]} · ${ftt}</div>${ev?`<div>${ev}</div>`:""}${mem}`;
   t.style.display="block"; moveTip(e); hl(i);
 }
 function moveTip(e){const t=$("tip"); let x=e.clientX+14; if(x+300>innerWidth)x=e.clientX-300; t.style.left=x+"px"; t.style.top=(e.clientY+14)+"px";}

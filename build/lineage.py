@@ -67,6 +67,26 @@ def load(name):
     with open(os.path.join(ROOT, "data", name), encoding="utf-8") as f:
         return json.load(f)
 
+# ---- 교수(전임교원) 조인 (data/faculty.json, extract_faculty.py 산출) ----
+try:
+    with open(os.path.join(ROOT, "data", "faculty.json"), encoding="utf-8") as f:
+        FAC = json.load(f)
+except FileNotFoundError:
+    FAC = {}
+_FDOTS = re.compile(r"[·・ㆍ‧⋅∙･•]")
+def _fnd(s): return _FDOTS.sub("·", re.sub(r"\s+", "", str(s)))
+def _sbase(s):
+    s = re.sub(r"\(.*?\)|_제\d+캠퍼스|_[^_]*캠퍼스", "", str(s)).strip()
+    return re.sub(r"^국립", "", s)
+def fac_lookup(year, school_raw, dept):
+    """전임교원 수 조회(없으면 None). 학과명 정규화 + 마지막 토큰(단과대학 접두 제거)."""
+    if not FAC: return None
+    sb = _sbase(school_raw)
+    for k in (_fnd(dept), _fnd(str(dept).split(" ")[-1])):
+        v = FAC.get(f"{year}|{sb}|{k}")
+        if v is not None: return v
+    return None
+
 def ev_status(events):
     out = set()
     for k in ("new", "merge", "split"):
@@ -171,6 +191,7 @@ def school_graph(yrmap, years, id0, band, gyodae=False):
                 mkey = re.sub(r"^초등(?=.+교육)", "", uk) if gyodae else uk  # 교대: 초등 접두 제거
                 agg[uk] = {"id": nid, "year": y, "dept": uk, "members": [], "band": band,
                            "sub_cnt": collections.Counter(), "mid_cnt": collections.Counter(),
+                           "sraw_cnt": collections.Counter(), "ftsum": 0.0, "fthit": 0,
                            "broad": r["broad"] or "기타", "dcode": r["dcode"],
                            "norm": norm_name(mkey), "stev": ev_status(r["event"])}
                 nid += 1
@@ -178,6 +199,9 @@ def school_graph(yrmap, years, id0, band, gyodae=False):
             nd["members"].append(r["dept"]); nd["stev"] |= ev_status(r["event"])
             if r["sub"]: nd["sub_cnt"][r["sub"]] += 1
             if r["mid"]: nd["mid_cnt"][r["mid"]] += 1
+            nd["sraw_cnt"][r["school_raw"]] += 1
+            ft = fac_lookup(y, r["school_raw"], r["dept"])   # 전임교원 수(교수 수)
+            if ft is not None: nd["ftsum"] += ft; nd["fthit"] += 1
         for nd in agg.values():
             nd["members"] = sorted(set(nd["members"])); nd["msz"] = len(nd["members"])
             nd["cores"] = member_cores(nd["members"], nd["dept"])
@@ -187,7 +211,14 @@ def school_graph(yrmap, years, id0, band, gyodae=False):
                 return (max(good)[1] if good else (max(cnt.items(), key=lambda kv: kv[1])[0] if cnt else ""))
             nd["sub"] = pick(nd["sub_cnt"]) or nd["broad"] or "기타"
             nd["mid"] = pick(nd["mid_cnt"]) or nd["broad"] or "기타"
-            del nd["sub_cnt"]; del nd["mid_cnt"]
+            # 교수 수: 멤버 합산(하나라도 매칭). 미매칭이면 노드(학부)명으로 폴백, 그래도 없으면 None.
+            sraw = nd["sraw_cnt"].most_common(1)[0][0]
+            if nd["fthit"] > 0:
+                nd["ft"] = round(nd["ftsum"], 1)
+            else:
+                fb = fac_lookup(y, sraw, nd["dept"])
+                nd["ft"] = round(fb, 1) if fb is not None else None
+            del nd["sub_cnt"]; del nd["mid_cnt"]; del nd["sraw_cnt"]; del nd["ftsum"]; del nd["fthit"]
             nodes.append(nd); per_year[y].append(nd)
     links = []
     byid = {n["id"]: n for n in nodes}
@@ -261,6 +292,35 @@ def school_graph(yrmap, years, id0, band, gyodae=False):
                           "x": 1 if d["broad"] != t["broad"] else 0})
             has_out.add(d["id"]); has_in.add(t["id"])
     return nodes, per_year, deaths, links, nid
+
+def propagate_faculty(nodes, links):
+    """관측 전임교원(ft)을 계보(cont/merge/split, 학교통합 xb 제외) 따라 흘려 null 채움.
+    분할=선행 ft/선행 out차수 배분, 통합=유입 합. 채운 값은 fte=1(추정), 관측=0."""
+    for n in nodes:
+        n["fte"] = 0 if n.get("ft") is not None else None
+    ins = collections.defaultdict(list); outs = collections.defaultdict(list)
+    for l in links:
+        if l.get("xb"): continue
+        outs[l["s"]].append(l["t"]); ins[l["t"]].append(l["s"])
+    order = sorted(range(len(nodes)), key=lambda i: nodes[i]["year"])
+    def fill(seq, nbr, deg):
+        for _ in range(8):
+            ch = False
+            for i in seq:
+                n = nodes[i]
+                if n.get("ft") is not None or not (2015 <= n["year"] <= 2025): continue
+                flow = 0.0; got = False
+                for j in nbr[i]:
+                    jf = nodes[j].get("ft")
+                    if jf is None: continue
+                    if (nbr is ins and nodes[j]["year"] >= n["year"]) or \
+                       (nbr is outs and nodes[j]["year"] <= n["year"]): continue
+                    flow += jf / max(1, len(deg[j])); got = True
+                if got:
+                    n["ft"] = round(flow, 1); n["fte"] = 1; ch = True
+            if not ch: break
+    fill(order, ins, outs)              # forward: 선행->후속(분할)
+    fill(list(reversed(order)), outs, ins)  # backward: 후속->선행(통합 합)
 
 def finalize_events(nodes, links, years_main):
     ins = collections.defaultdict(list); outs = collections.defaultdict(list)
@@ -398,6 +458,7 @@ def build():
                  for l in links if l["s"] in idmap and l["t"] in idmap]
 
         finalize_events(nodes, links, years)
+        propagate_faculty(nodes, links)   # 계보 따라 교수 수 계승/분할로 null 채움
 
         # cleanup working fields
         for n in nodes:

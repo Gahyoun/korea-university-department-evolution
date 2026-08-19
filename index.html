@@ -14,8 +14,8 @@
   .eyebrow{color:var(--accent);font-size:13px;font-weight:700;letter-spacing:1px;text-transform:uppercase}
   h1{font-size:34px;margin:8px 0 6px;font-weight:800;letter-spacing:-.5px;line-height:1.2}
   .lead{color:var(--mut);font-size:16px;max-width:720px}
-  .cards{display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px;margin:34px 0}
-  @media(max-width:860px){.cards{grid-template-columns:1fr}}
+  .cards{display:grid;grid-template-columns:repeat(2,1fr);gap:16px;margin:34px 0}
+  @media(max-width:640px){.cards{grid-template-columns:1fr}}
   .card{display:block;text-decoration:none;color:inherit;background:var(--panel);border:1px solid var(--line);
     border-radius:16px;padding:22px;transition:.18s;position:relative;overflow:hidden}
   .card:hover{border-color:var(--accent);transform:translateY(-3px)}
@@ -50,8 +50,15 @@
     <a class="card" href="alluvial.html">
       <div><span class="tag">학교별</span><span class="tag">Alluvial / Sankey</span></div>
       <h2>학과 계보 Alluvial &nbsp;→</h2>
-      <p>한 대학을 골라 2014→2026 학과 흐름을 봅니다. 노드 크기는 학과/전공 수입니다.
+      <p>한 대학을 골라 2014→2026 학과 흐름을 봅니다. 노드 높이는 학과/전공 수입니다.
          학부 통폐합이면 굵어지고, 분리되면 가늘어집니다. 국립대 학교통합은 상·하 밴드로 나눠 표현합니다.</p>
+      <div class="go">대학 선택해서 보기 →</div>
+    </a>
+    <a class="card" href="faculty.html">
+      <div><span class="tag">학교별</span><span class="tag">교수 수 · Faculty</span></div>
+      <h2>학과 계보 · 교수 수 &nbsp;→</h2>
+      <p>같은 계보를 <span class="k">노드 높이 = 전임교원(교수) 수</span>로 봅니다(2015–2025).
+         학과의 실제 규모와 통폐합·분리에 따른 교수 규모 흐름을 읽습니다. 회색 = 교수수 미상.</p>
       <div class="go">대학 선택해서 보기 →</div>
     </a>
     <a class="card" href="namesplit.html">

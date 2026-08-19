@@ -3,3 +3,5 @@
 numpy==1.26.4
 openpyxl==3.1.5      # 원본 xlsx 파싱 (normalize)
 kiwipiepy==0.23.2    # 학과명 명사 추출 (build_keywords)
+pandas==2.2.2        # 교수 parquet 로드 (extract_faculty)
+pyarrow==14.0.2      # parquet 엔진 (extract_faculty)

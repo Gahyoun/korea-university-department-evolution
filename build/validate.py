@@ -25,7 +25,7 @@ def check_alluvial(file, obj):
     for k in ("school", "years", "nodes", "links", "bands"):
         if k not in obj: err(f"{file}: missing '{k}'"); return
     for i, n in enumerate(obj["nodes"]):
-        if len(n) != 8: err(f"{file}: node[{i}] arity {len(n)} != 8"); break
+        if len(n) != 10: err(f"{file}: node[{i}] arity {len(n)} != 10"); break
     nb = len(obj["bands"])
     for i, n in enumerate(obj["nodes"]):
         if not (0 <= n[7] <= nb): err(f"{file}: node[{i}] band {n[7]} out of [0,{nb}]"); break

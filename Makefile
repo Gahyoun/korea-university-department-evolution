@@ -10,7 +10,8 @@ all: viz manifest validate   ## 전체 파이프라인
 deps:            ## 의존성 설치 (빌드 전용; 런타임은 의존성 0)
 	$(PY) -m pip install -r requirements.txt
 
-data:            ## 1) 정규화·필터  2) 계보 추론
+data:            ## 0) 교수 조인테이블  1) 정규화·필터  2) 계보 추론(+교수 수 전파)
+	$(PY) build/extract_faculty.py
 	$(PY) build/normalize.py
 	$(PY) build/lineage.py
 
