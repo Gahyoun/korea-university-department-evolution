@@ -161,6 +161,25 @@ display(bundle.stable_ranges.round(3))
 display(Image(filename=str(FIG_DIR / "fig02_event_hazard_size.png")))
 """),
     md(r"""
+### 3.1 현재 교수 수와 다음 해 사건빈도의 temporal association
+
+관측단위는 학과–연도이며 설명변수는 `t`년의 교수 수, 결과는 `t+1`년 사건이다. 따라서 같은 해에
+측정된 횡단면 상관관계와 구분된다. 사건 발생 여부가 이항변수이므로 다음 세 값을 함께 제시한다.
+
+- **Spearman rho:** 정규화 교수 수와 사건 여부의 단조 관계를 나타내는 기술통계.
+- **Point-biserial r:** log 정규화 교수 수와 사건 여부의 선형적 관계.
+- **Adjusted odds ratio:** 분야와 source year를 보정한 binomial temporal hazard. 표준오차는 대학별로 cluster한다.
+
+odds ratio는 log 정규화 교수 수가 1 standard deviation 증가할 때의 값이다. `OR<1`이면 큰 학과일수록
+해당 사건 위험이 낮고, `OR>1`이면 높다. 전체 변화만 합치면 작은 학과의 closure와 큰 학과의 split이
+상쇄될 수 있으므로 사건별 결과를 우선한다. 이는 association이며 causal effect가 아니다.
+"""),
+    code(r"""
+display(bundle.size_event_association.round(6))
+display(bundle.size_event_rates.pivot(index="normalized_size_bin", columns="event", values="event_rate").round(5))
+display(Image(filename=str(FIG_DIR / "fig07_size_event_temporal_association.png")))
+"""),
+    md(r"""
 ## 4. Entropy, CMI와 TE-like lagged information
 
 - `H(event)`: 아무 feature가 없을 때 next event의 불확실성.
@@ -274,6 +293,10 @@ pred = bundle.predictive_table.set_index("feature_block")
 size_cmi = info.loc["I(size regime; event | field, year)", "bias_corrected_bits"]
 rename_cmi = info.loc["I(previous rename; restructure | size, field, year)", "bias_corrected_bits"]
 te_like = info.loc["TE-like I(school change; restructure | focal state)", "bias_corrected_bits"]
+assoc = bundle.size_event_association.set_index("event")
+close_or = assoc.loc["close", "adjusted_odds_ratio_per_1sd_log_size"]
+split_or = assoc.loc["split/complex", "adjusted_odds_ratio_per_1sd_log_size"]
+rename_or = assoc.loc["rename among continuations", "adjusted_odds_ratio_per_1sd_log_size"]
 
 report = f'''
 ### Empirical results
@@ -291,6 +314,9 @@ report = f'''
   restructuring field와 일치하지만 인과효과는 아니다.
 - out-of-time model에서 size block은 **{pred.loc['size','incremental_bits_per_event']:.5f} bits/event**,
   name-history block은 **{pred.loc['name history','incremental_bits_per_event']:.5f} bits/event**를 추가했다.
+- 분야와 연도를 보정했을 때 log 정규화 교수 수가 1 SD 증가할수록 closure odds는
+  **{close_or:.3f}배**, split/complex odds는 **{split_or:.3f}배**, continuation 중 rename odds는
+  **{rename_or:.3f}배**다. 규모는 사건빈도 전체를 한 방향으로 움직이기보다 사건 종류를 바꾼다.
 
 ### Report-worthy claim
 
@@ -316,6 +342,7 @@ display(Markdown(report))
 | multistate/entropy-rate dynamics | `fig04_transition_matrix.png`, `table07_transition_matrix.csv` |
 | rename/modifier temporal adaptation | `fig05_added_modifiers.png`, `table08_added_modifiers.csv` |
 | BD local drift vs organizational jumps | `fig06_bd_and_empirical_drift.png` |
+| lagged size–event frequency association | `fig07_size_event_temporal_association.png`, `table09–11` |
 
 최종 원고에서는 `universality` 대신 `cross-field regularity`, `causal effect` 대신
 `conditional predictive information`이라는 표현을 사용한다.

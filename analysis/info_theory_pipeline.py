@@ -24,6 +24,8 @@ import matplotlib.font_manager as font_manager
 import numpy as np
 import pandas as pd
 import seaborn as sns
+import statsmodels.api as sm
+import statsmodels.formula.api as smf
 from kiwipiepy import Kiwi
 from scipy import stats
 from sklearn.compose import ColumnTransformer
@@ -72,6 +74,9 @@ class AnalysisBundle:
     transition_matrix: pd.DataFrame
     modifier_table: pd.DataFrame
     bd_table: pd.DataFrame
+    size_event_association: pd.DataFrame
+    annual_size_event_correlation: pd.DataFrame
+    size_event_rates: pd.DataFrame
     summary: dict
 
 
@@ -548,6 +553,98 @@ def temporal_summary(nodes: pd.DataFrame, panel: pd.DataFrame) -> pd.DataFrame:
     return event_rates.reset_index()
 
 
+def size_event_temporal_association(
+    panel: pd.DataFrame,
+) -> tuple[pd.DataFrame, pd.DataFrame, pd.DataFrame]:
+    """Relate size at t to event occurrence at t+1 without pooling opposing events.
+
+    The rank/point-biserial correlations are descriptive.  The odds ratio is from
+    a field- and year-adjusted binomial GLM with university-clustered covariance.
+    One unit of the GLM predictor is one standard deviation of log normalized
+    faculty size.  Rename is evaluated only among one-to-one continuations.
+    """
+    work = panel.copy()
+    work["log_normalized_size"] = np.log(work["normalized_size"].clip(lower=1e-9))
+    scale = work["log_normalized_size"].std(ddof=0)
+    work["size_z"] = (work["log_normalized_size"] - work["log_normalized_size"].mean()) / scale
+    work["any_structural"] = work["restructure_next"].astype(int)
+    work["close_event"] = (work["event_next"] == "close").astype(int)
+    work["merge_event"] = (work["event_next"] == "merge").astype(int)
+    work["split_event"] = work["event_next"].isin(["split", "complex"]).astype(int)
+    work["rename_event"] = work["rename_next"].astype(int)
+
+    outcomes = [
+        ("any structural event", "any_structural", False),
+        ("close", "close_event", False),
+        ("merge", "merge_event", False),
+        ("split/complex", "split_event", False),
+        ("rename among continuations", "rename_event", True),
+    ]
+    association_rows, annual_rows = [], []
+    for label, target, continue_only in outcomes:
+        sample = work[work["event_next"] == "continue"].copy() if continue_only else work.copy()
+        sample = sample.dropna(subset=["normalized_size", "size_z", target, "broad", "year_str", "node_school"])
+        rho, rho_p = stats.spearmanr(sample["normalized_size"], sample[target])
+        point_biserial, pb_p = stats.pointbiserialr(sample[target], sample["log_normalized_size"])
+        fit = smf.glm(
+            formula=f"{target} ~ size_z + C(broad) + C(year_str)",
+            data=sample,
+            family=sm.families.Binomial(),
+        ).fit(cov_type="cluster", cov_kwds={"groups": sample["node_school"]})
+        lower, upper = fit.conf_int().loc["size_z"]
+        association_rows.append(
+            {
+                "event": label,
+                "n_department_years": len(sample),
+                "n_events": int(sample[target].sum()),
+                "event_rate": float(sample[target].mean()),
+                "spearman_rho": float(rho),
+                "spearman_p": float(rho_p),
+                "point_biserial_r": float(point_biserial),
+                "point_biserial_p": float(pb_p),
+                "adjusted_odds_ratio_per_1sd_log_size": float(np.exp(fit.params["size_z"])),
+                "or_ci_low": float(np.exp(lower)),
+                "or_ci_high": float(np.exp(upper)),
+                "cluster_robust_p": float(fit.pvalues["size_z"]),
+            }
+        )
+        for year, group in sample.groupby("year"):
+            if group[target].nunique() < 2:
+                yearly_rho, yearly_p = np.nan, np.nan
+            else:
+                yearly_rho, yearly_p = stats.spearmanr(group["normalized_size"], group[target])
+            annual_rows.append(
+                {
+                    "year": int(year),
+                    "event": label,
+                    "n_department_years": len(group),
+                    "n_events": int(group[target].sum()),
+                    "event_rate": float(group[target].mean()),
+                    "spearman_rho": float(yearly_rho),
+                    "spearman_p": float(yearly_p),
+                }
+            )
+
+    bins = [0, 0.5, 0.8, 1.2, 2, np.inf]
+    labels = ["<0.5", "0.5–0.8", "0.8–1.2", "1.2–2", ">2"]
+    work["normalized_size_bin"] = pd.cut(work["normalized_size"], bins=bins, labels=labels)
+    rate_rows = []
+    for label, target, continue_only in outcomes:
+        sample = work[work["event_next"] == "continue"].copy() if continue_only else work
+        grouped = sample.groupby("normalized_size_bin", observed=True)[target].agg(["size", "sum", "mean"])
+        for size_bin, row in grouped.iterrows():
+            rate_rows.append(
+                {
+                    "normalized_size_bin": str(size_bin),
+                    "event": label,
+                    "n_department_years": int(row["size"]),
+                    "n_events": int(row["sum"]),
+                    "event_rate": float(row["mean"]),
+                }
+            )
+    return pd.DataFrame(association_rows), pd.DataFrame(annual_rows), pd.DataFrame(rate_rows)
+
+
 def permutation_cmi(
     df: pd.DataFrame,
     x: str,
@@ -970,6 +1067,36 @@ def create_figures(bundle: AnalysisBundle, output_dir: str | Path) -> None:
     axes[1].set(xscale="log", title="Empirical drift among continuing departments", xlabel="faculty size s", ylabel=r"mean $\Delta s$")
     fig.tight_layout(); fig.savefig(output_dir / "fig06_bd_and_empirical_drift.png", dpi=180); plt.close(fig)
 
+    association = bundle.size_event_association.copy()
+    annual = bundle.annual_size_event_correlation.copy()
+    fig, axes = plt.subplots(1, 2, figsize=(17, 6.2), gridspec_kw={"width_ratios": [1, 1.45]})
+    plot_order = ["close", "merge", "split/complex", "rename among continuations", "any structural event"]
+    forest = association.set_index("event").loc[plot_order].reset_index()
+    y = np.arange(len(forest))
+    axes[0].errorbar(
+        forest["adjusted_odds_ratio_per_1sd_log_size"],
+        y,
+        xerr=[
+            forest["adjusted_odds_ratio_per_1sd_log_size"] - forest["or_ci_low"],
+            forest["or_ci_high"] - forest["adjusted_odds_ratio_per_1sd_log_size"],
+        ],
+        fmt="o", color="#4C78A8", ecolor="#7F8C8D", capsize=4,
+    )
+    axes[0].axvline(1, color="black", ls="--", lw=1)
+    axes[0].set_yticks(y, forest["event"])
+    axes[0].set_xscale("log")
+    axes[0].invert_yaxis()
+    axes[0].set(
+        title="Adjusted event hazard by current size",
+        xlabel="odds ratio per 1 SD log normalized size",
+        ylabel="next-year event",
+    )
+    heat = annual.pivot(index="event", columns="year", values="spearman_rho").reindex(plot_order)
+    sns.heatmap(heat, center=0, cmap="vlag", annot=False, linewidths=.5, ax=axes[1])
+    axes[1].set(title="Year-specific lagged rank correlation", xlabel="source year t", ylabel="next-year event")
+    axes[1].tick_params(axis="both", labelsize=10)
+    fig.tight_layout(); fig.savefig(output_dir / "fig07_size_event_temporal_association.png", dpi=180); plt.close(fig)
+
 
 def export_tables(bundle: AnalysisBundle, output_dir: str | Path) -> None:
     output_dir = Path(output_dir); output_dir.mkdir(parents=True, exist_ok=True)
@@ -982,6 +1109,9 @@ def export_tables(bundle: AnalysisBundle, output_dir: str | Path) -> None:
         "table06_multiclass_prediction.csv": bundle.multiclass_table,
         "table07_transition_matrix.csv": bundle.transition_matrix.reset_index(),
         "table08_added_modifiers.csv": bundle.modifier_table,
+        "table09_size_event_association.csv": bundle.size_event_association,
+        "table10_annual_size_event_correlation.csv": bundle.annual_size_event_correlation,
+        "table11_size_binned_event_rates.csv": bundle.size_event_rates,
     }
     for filename, frame in tables.items():
         frame.to_csv(output_dir / filename, index=False, encoding="utf-8-sig")
@@ -1004,6 +1134,7 @@ def run_analysis(
         .reset_index(drop=True)
     )
     temporal = temporal_summary(nodes, panel)
+    association, annual_correlation, binned_rates = size_event_temporal_association(panel)
     info = information_summary(panel, n_perm=n_perm)
     binary_performance, predictive_info, predictions = rolling_predictions(panel)
     multiclass = multiclass_rolling(panel)
@@ -1045,6 +1176,9 @@ def run_analysis(
         transition_matrix=matrix,
         modifier_table=modifiers,
         bd_table=bd,
+        size_event_association=association,
+        annual_size_event_correlation=annual_correlation,
+        size_event_rates=binned_rates,
         summary=summary,
     )
     if figure_dir is not None:

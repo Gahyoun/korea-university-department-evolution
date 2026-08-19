@@ -18,6 +18,7 @@
 
 ## 정보이론·통계물리 분석
 
+- [`how-large-academic-departments-korea/`](how-large-academic-departments-korea/) — 지도교수 보고용 `REPORT.md`, 실행 완료 notebook, 논문 후보 그림·표를 묶은 한국 temporal extension.
 - [`analysis/department_evolution_information_theory.ipynb`](analysis/department_evolution_information_theory.ipynb) — Alluvial 계보에 전임교원 규모를 결합해 event entropy, conditional mutual information, TE-like lagged information, out-of-time prediction, size-state entropy rate, Becker–Döring drift, 개명·수식어 temporal signal을 계산한다.
 - [`docs/INFORMATION_THEORY_RESEARCH_DESIGN.md`](docs/INFORMATION_THEORY_RESEARCH_DESIGN.md) — event taxonomy, 위험집합, 정보이론 지표, generalized coagulation–fragmentation 해석, validation/leakage 방지와 논문 figure/table 설계.
 - 실행 의존성은 [`analysis/requirements.txt`](analysis/requirements.txt)에 분리했다. 원자료 Excel은 저장소에 포함하지 않으며 `FACULTY_DATA_DIR` 환경변수로 지정한다.
