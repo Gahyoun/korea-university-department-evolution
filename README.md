@@ -16,6 +16,12 @@
 | [`namesplit.html`](namesplit.html) | **소계열 학과명 분화 Alluvial** — 대계열▸중계열▸소계열 계층 선택 → 전국 대학에서 학과 "이름"이 어떻게 이어지고 갈라지는지. 노드=명칭, 크기=학교 수. 상단에 계열 학과 수 증감 스트립. |
 | [`keywords.html`](keywords.html) | **학과명 키워드 Temporal** — 신설/활성 학과명 키워드의 연도별 버블 + 급상승 랭킹(융합·AI·반도체·스마트…). |
 
+## 정보이론·통계물리 분석
+
+- [`analysis/department_evolution_information_theory.ipynb`](analysis/department_evolution_information_theory.ipynb) — Alluvial 계보에 전임교원 규모를 결합해 event entropy, conditional mutual information, TE-like lagged information, out-of-time prediction, size-state entropy rate, Becker–Döring drift, 개명·수식어 temporal signal을 계산한다.
+- [`docs/INFORMATION_THEORY_RESEARCH_DESIGN.md`](docs/INFORMATION_THEORY_RESEARCH_DESIGN.md) — event taxonomy, 위험집합, 정보이론 지표, generalized coagulation–fragmentation 해석, validation/leakage 방지와 논문 figure/table 설계.
+- 실행 의존성은 [`analysis/requirements.txt`](analysis/requirements.txt)에 분리했다. 원자료 Excel은 저장소에 포함하지 않으며 `FACULTY_DATA_DIR` 환경변수로 지정한다.
+
 ## 아키텍처
 
 읽기 전용 분석 데이터셋 → **서버·DB 없는 정적 데이터 API**가 정답인 구조.
