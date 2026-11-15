@@ -128,8 +128,18 @@ function buildSide(){
     };
     return button;
   };
-  const ru=$("rising"); ru.innerHTML=""; up.forEach(x=>ru.appendChild(row(x[0],x[1])));
-  const rd=$("falling"); rd.innerHTML=""; dn.forEach(x=>rd.appendChild(row(x[0],x[1])));
+  for (const [id,ranking,empty] of [
+    ["rising",up,"증가한 키워드가 없습니다."],
+    ["falling",dn,"하락한 키워드가 없습니다."],
+  ]) {
+    const list=$(id);
+    list.replaceChildren(...ranking.map(([word,change])=>row(word,change)));
+    if (!ranking.length) {
+      const message=document.createElement("p");
+      message.textContent=empty;
+      list.appendChild(message);
+    }
+  }
 }
 function tip(e,kw,yr,v,arr){const t=$("tip");
   const ex=(PAYLOAD.examples[kw]||[]).slice(0,6).join(" · ");
