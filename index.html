@@ -1,135 +1,173 @@
 <!DOCTYPE html>
-<html lang="ko">
+<html lang="ko" data-krds-mode="light">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="description" content="대학알리미 2014–2026 자료로 한국 4년제 대학의 학과 계보, 학과명 분화, 키워드 추이와 전임교원 규모를 살펴봅니다.">
 <title>한국 4년제 대학 학과 변천사 · 2014–2026</title>
-<style>
-  :root{ --bg:#0f1115; --panel:#171a21; --ink:#e8eaed; --mut:#9aa0aa; --line:#2a2f3a;
-    --accent:#6aa6ff; --new:#3ddc84; --merge:#c89bff; --school:#4dd0e1; }
-  *{box-sizing:border-box}
-  body{margin:0;font-family:-apple-system,BlinkMacSystemFont,"Apple SD Gothic Neo","Pretendard","Malgun Gothic",sans-serif;
-    background:radial-gradient(1200px 600px at 70% -10%,#1a2030,#0f1115 60%);color:var(--ink);line-height:1.6}
-  .wrap{max-width:980px;margin:0 auto;padding:54px 22px 80px}
-  .eyebrow{color:var(--accent);font-size:13px;font-weight:700;letter-spacing:1px;text-transform:uppercase}
-  h1{font-size:34px;margin:8px 0 6px;font-weight:800;letter-spacing:-.5px;line-height:1.2}
-  .lead{color:var(--mut);font-size:16px;max-width:720px}
-  .cards{display:grid;grid-template-columns:repeat(2,1fr);gap:16px;margin:34px 0}
-  @media(max-width:640px){.cards{grid-template-columns:1fr}}
-  .card{display:block;text-decoration:none;color:inherit;background:var(--panel);border:1px solid var(--line);
-    border-radius:16px;padding:22px;transition:.18s;position:relative;overflow:hidden}
-  .card:hover{border-color:var(--accent);transform:translateY(-3px)}
-  .card h2{margin:0 0 6px;font-size:19px}
-  .card p{margin:0;color:var(--mut);font-size:13.5px}
-  .card .go{margin-top:14px;color:var(--accent);font-size:13px;font-weight:600}
-  .tag{display:inline-block;font-size:11px;color:var(--mut);border:1px solid var(--line);border-radius:20px;padding:3px 10px;margin:0 4px 6px 0}
-  section{margin-top:40px}
-  h3{font-size:15px;margin:0 0 10px;color:var(--ink)}
-  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:24px}
-  @media(max-width:720px){.grid2{grid-template-columns:1fr}}
-  ul{margin:6px 0;padding-left:18px;color:var(--mut);font-size:13.5px}
-  li{margin:4px 0}
-  .k{color:var(--ink);font-weight:600}
-  .legend-inline span{display:inline-flex;align-items:center;gap:5px;margin-right:14px;font-size:12px;color:var(--mut)}
-  .dot{width:11px;height:11px;border-radius:3px;display:inline-block}
-  footer{margin-top:46px;padding-top:18px;border-top:1px solid var(--line);color:#6b7280;font-size:12px}
-  a.inl{color:var(--accent);text-decoration:none}
-  .mini{font-size:12px;color:#6b7280;margin-top:4px}
-</style>
+<link rel="stylesheet" href="assets/krds/primitives.css">
+<link rel="stylesheet" href="assets/krds/semantic.css">
+<link rel="stylesheet" href="assets/site.css">
+<script src="assets/site.js" defer></script>
+<script src="assets/overview.js" defer></script>
 </head>
 <body>
-<div class="wrap">
-  <div class="eyebrow">대학알리미 · 2014–2026 · 4년제 대학</div>
-  <h1>한국 대학 학과의 변천사</h1>
-  <p class="lead">"창의"·"융합" 같은 첨단·세부 분야 특성화 학과명이 늘어나는 양상을 대학알리미 13개년(2014–2026)
-     데이터로 집계해 보여드립니다. 한 학교 안에서 학과가 어떻게 <span class="k">신설·통합·분리·폐지</span>되었는지(Alluvial),
-     소·대계열별로 <span class="k">학과명 키워드의 빈도가 어떻게 변했는지</span>(Temporal)를 살펴봅니다.
-     원인을 설명하기보다 <span class="k">명명(命名)의 변화를 기록</span>하는 데 목적이 있습니다.</p>
-
-  <div class="cards">
-    <a class="card" href="alluvial.html">
-      <div><span class="tag">학교별</span><span class="tag">Alluvial / Sankey</span></div>
-      <h2>학과 계보 Alluvial &nbsp;→</h2>
-      <p>한 대학을 골라 2014→2026 학과 흐름을 봅니다. 노드 높이는 학과/전공 수입니다.
-         학부 통폐합이면 굵어지고, 분리되면 가늘어집니다. 국립대 학교통합은 상·하 밴드로 나눠 표현합니다.</p>
-      <div class="go">대학 선택해서 보기 →</div>
-    </a>
-    <a class="card" href="faculty.html">
-      <div><span class="tag">학교별</span><span class="tag">교수 수 · Faculty</span></div>
-      <h2>학과 계보 · 교수 수 &nbsp;→</h2>
-      <p>같은 계보를 <span class="k">노드 높이 = 전임교원(교수) 수</span>로 봅니다(2015–2025).
-         학과의 실제 규모와 통폐합·분리에 따른 교수 규모 흐름을 읽습니다. 회색 = 교수수 미상.</p>
-      <div class="go">대학 선택해서 보기 →</div>
-    </a>
-    <a class="card" href="namesplit.html">
-      <div><span class="tag">소계열별</span><span class="tag">명칭 Alluvial</span></div>
-      <h2>학과명 분화 &nbsp;→</h2>
-      <p>한 소계열 안에서 전국 대학의 학과 "이름"이 어떻게 이어지고 갈라지는지 봅니다.
-         노드는 명칭, 크기는 그 명칭을 쓰는 학교 수입니다. 같은 이름은 가로로 잇고, 분화·개명은 색 리본으로 표시합니다.</p>
-      <div class="go">소계열 선택해서 보기 →</div>
-    </a>
-    <a class="card" href="keywords.html">
-      <div><span class="tag">소·대계열별</span><span class="tag">Keyword Bubble</span></div>
-      <h2>학과명 키워드 Temporal &nbsp;→</h2>
-      <p>신설 학과명에 등장하는 키워드의 연도별 빈도를 버블로 봅니다.
-         초기 대비 최근 빈도가 늘어난 키워드(융합·AI·반도체·스마트·글로벌·디자인 등) 순위를 함께 제공합니다.</p>
-      <div class="go">키워드 변화 보기 →</div>
-    </a>
+<div id="krds-skip-link"><a href="#contents">본문 바로가기</a></div>
+<header id="krds-header">
+  <div class="inner header-branding">
+    <a class="site-identity" href="index.html">대학 학과 변천사</a>
+    <div class="header-actions">
+      <label class="screen-mode" for="screen-mode">
+        <span class="sr-only">화면 설정</span>
+        <select id="screen-mode" title="화면 설정">
+          <option value="light">기본 화면</option>
+          <option value="high-contrast">선명한 화면</option>
+          <option value="theme">시스템 설정</option>
+        </select>
+      </label>
+      <a class="source-link" href="https://github.com/Gahyoun/korea-university-department-evolution">GitHub <span aria-hidden="true">↗</span></a>
+      <button class="btn-navi" type="button" aria-controls="primary-nav" aria-expanded="false" hidden>
+        <span class="menu-icon" aria-hidden="true">☰</span> 메뉴
+      </button>
+    </div>
   </div>
-
-  <section class="grid2">
-    <div>
-      <h3>대상 · 필터링 기준</h3>
-      <ul>
-        <li>대상은 <span class="k">4년제 일반대 + 교육대(+전환된 산업대)</span>입니다. 사이버·방송통신·각종학교는 제외했습니다.</li>
-        <li>활성 학과만 셉니다. 학과상태가 폐지/폐과면 제외하고, 신설·기존·변경·통합·분리는 포함합니다.</li>
-        <li>다음은 제외했습니다: <span class="k">무전공/자유·자율전공/광역·계열모집</span>, 교양대학·교양학부, 1학년전용, 모집단위(기타모집단위·단과대학 광역모집 등).</li>
-        <li>학부 단위로 집계합니다. "OO학부 XX전공"은 학부로 묶어 한 노드(크기=전공 수)로 봅니다.</li>
-      </ul>
-    </div>
-    <div>
-      <h3>국립대 명칭변경 · 통합 처리</h3>
-      <ul>
-        <li>국립화 명칭변경(OO대→<span class="k">국립</span>OO대, 안동대→국립경국대)은 학교코드로 <span class="k">동일 학교</span>로 봅니다. 별도 이벤트로 세지 않습니다.</li>
-        <li>학교 간 통합만 따로 표기합니다: <span class="k">경상국립대</span>(경상대+경남과기대, 2022), <span class="k">강원대</span>(+국립강릉원주대, 2026).</li>
-        <li>흡수된 학교는 하단 밴드로 그리고, 통합 연도에 본교로 합류시킵니다(<span style="color:var(--school)">학교통합</span> 링크).</li>
-      </ul>
+  <nav class="krds-main-menu" id="primary-nav" aria-label="주 메뉴">
+    <ul class="inner gnb-menu">
+      <li><a class="gnb-main-trigger" href="index.html" aria-current="page">개요</a></li>
+      <li><a class="gnb-main-trigger" href="alluvial.html">학과 계보</a></li>
+      <li><a class="gnb-main-trigger" href="namesplit.html">학과명 분화</a></li>
+      <li><a class="gnb-main-trigger" href="keywords.html">키워드 추이</a></li>
+      <li><a class="gnb-main-trigger" href="faculty.html">전임교원 계보</a></li>
+    </ul>
+  </nav>
+</header>
+<main id="contents" tabindex="-1">
+  <section class="overview-hero" aria-labelledby="overview-title">
+    <div class="inner hero-layout">
+      <div class="hero-copy">
+        <p class="data-kicker">대학알리미 <span aria-hidden="true">·</span> 2014–2026</p>
+        <h1 id="overview-title">한국 4년제 대학<br>학과의 변천사</h1>
+        <p class="hero-lead">어떤 학과가 생기고, 합쳐지고, 사라졌을까요? 대학알리미 13개년 자료로 학과의 계보와 이름의 변화를 살펴봅니다.</p>
+        <div class="hero-actions">
+          <a class="krds-btn primary" href="alluvial.html">학과 계보 탐색 <span aria-hidden="true">→</span></a>
+          <a class="krds-btn secondary" href="#method">데이터 읽는 법 <span aria-hidden="true">↓</span></a>
+        </div>
+      </div>
+      <figure class="lineage-preview">
+        <figcaption>
+          <strong>경상국립대학교 공학 계보</strong>
+          <span>2023–2025년 일부 학과</span>
+        </figcaption>
+        <svg viewBox="0 0 500 204" role="img" aria-labelledby="sample-title sample-desc">
+          <title id="sample-title">경상국립대학교 공학 계보의 일부</title>
+          <desc id="sample-desc">2023년 컴퓨터과학부는 2024년 컴퓨터공학과, 2025년 컴퓨터공학부로 연결됩니다. 2023년 항공우주및소프트웨어공학부는 2024년과 2025년의 항공우주공학부로 이어집니다. 기계공학부는 3년 동안 같은 명칭으로 연결됩니다.</desc>
+          <g class="sample-ticks"><path d="M48 41V188 M250 41V188 M452 41V188"/></g>
+          <g class="sample-years"><text x="48" y="24">2023</text><text x="250" y="24">2024</text><text x="452" y="24">2025</text></g>
+          <g class="sample-ribbons">
+            <path class="sample-merge" d="M48 57 C155 57 152 70 250 70 L250 83 C152 83 155 81 48 81Z"/>
+            <path class="sample-blue" d="M250 70 C361 70 349 55 452 55 L452 68 C349 68 361 83 250 83Z"/>
+            <path class="sample-merge" d="M48 112 C155 112 151 125 250 125 L250 138 C151 138 155 125 48 125Z"/>
+            <path class="sample-blue" d="M250 125 C364 125 342 113 452 113 L452 126 C342 126 364 138 250 138Z"/>
+            <path class="sample-blue" d="M48 169 C148 169 149 173 250 173 S351 164 452 164 L452 177 C351 177 351 186 250 186 S148 182 48 182Z"/>
+          </g>
+          <g class="sample-nodes">
+            <path class="sample-mark-merge" d="M48 57v24 M48 112v13"/>
+            <path d="M250 70v13 M452 55v13 M250 125v13 M452 113v13 M48 169v13 M250 173v13 M452 164v13"/>
+          </g>
+          <g class="sample-labels">
+            <text x="48" y="99" text-anchor="start">컴퓨터과학부</text><text x="250" y="102">컴퓨터공학과</text><text x="452" y="87" text-anchor="end">컴퓨터공학부</text>
+            <text x="48" y="145" text-anchor="start">항공우주및소프트웨어공학부</text><text x="250" y="158">항공우주공학부</text><text x="452" y="145" text-anchor="end">항공우주공학부</text>
+            <text x="48" y="201" text-anchor="start">기계공학부</text><text x="452" y="196" text-anchor="end">기계공학부</text>
+          </g>
+        </svg>
+        <ul class="sample-mobile-labels" aria-hidden="true">
+          <li>컴퓨터과학부 → 컴퓨터공학과 → 컴퓨터공학부</li>
+          <li>항공우주및소프트웨어공학부 → 항공우주공학부</li>
+          <li>기계공학부 → 기계공학부</li>
+        </ul>
+        <div class="preview-bottom">
+          <div class="preview-legend"><span><i></i>연속</span><span><i></i>통합</span></div>
+          <a href="alluvial.html?school=경상국립대학교&amp;broad=공학">이 대학 계보 보기 <span aria-hidden="true">→</span></a>
+        </div>
+      </figure>
     </div>
   </section>
-
-  <section>
-    <h3>읽는 법</h3>
-    <div class="legend-inline">
-      <span><span class="dot" style="background:var(--new)"></span>신설</span>
-      <span><span class="dot" style="background:var(--merge)"></span>통합(학부)</span>
-      <span><span class="dot" style="background:var(--school)"></span>학교통합</span>
-      <span><span class="dot" style="background:#ffb74d"></span>분리</span>
-      <span><span class="dot" style="background:#ff5d5d"></span>폐지</span>
+  <div class="overview-coverage">
+    <dl class="inner coverage-grid" aria-label="데이터 범위">
+      <div><dt>분석 기간</dt><dd data-stat="years">2014–2026</dd></div>
+      <div><dt>대상 대학</dt><dd data-stat="schools">209<span>개교</span></dd></div>
+      <div><dt>활성 학과 기록</dt><dd data-stat="active_dept_records">120,473<span>건</span></dd></div>
+      <div><dt>분석 소계열</dt><dd data-stat="namesplit_subs">144<span>개</span></dd></div>
+    </dl>
+  </div>
+  <div class="inner overview-content">
+    <section class="sec" id="explore" aria-labelledby="explore-title">
+      <h2 class="sec-tit" id="explore-title">데이터 탐색</h2>
+      <ul class="analysis-grid">
+      <li>
+        <a class="analysis-card" href="alluvial.html">
+          <svg class="analysis-icon" aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M4 5v4m0 6v4M20 4v5m0 6v5M4 7c8 0 8 10 16 10M4 17c8 0 8-10 16-10"/></svg>
+          <h3>학과 계보</h3>
+          <p>대학별 학과의 신설·통합·분리·폐지를 흐름으로 살펴봅니다.</p>
+          <span class="card-action">대학별 흐름 보기 <span aria-hidden="true">→</span></span>
+        </a>
+      </li>
+      <li>
+        <a class="analysis-card" href="namesplit.html">
+          <svg class="analysis-icon" aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12h4c5 0 5-6 10-6h2M8 12c5 0 5 6 10 6h2M20 4v4m0 8v4M4 10v4"/></svg>
+          <h3>학과명 분화</h3>
+          <p>소계열을 골라 전국에서 어떤 학과명이 이어지고 갈라졌는지 확인합니다.</p>
+          <span class="card-action">소계열별 분화 보기 <span aria-hidden="true">→</span></span>
+        </a>
+      </li>
+      <li>
+        <a class="analysis-card" href="keywords.html">
+          <svg class="analysis-icon" aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="6" cy="16" r="2"/><circle cx="12" cy="11" r="3"/><circle cx="19" cy="6" r="3.5"/><path d="M3 21h18"/></svg>
+          <h3>키워드 추이</h3>
+          <p>융합·AI·반도체 등 학과명에 쓰인 키워드의 빈도와 변화를 비교합니다.</p>
+          <span class="card-action">키워드 변화 보기 <span aria-hidden="true">→</span></span>
+        </a>
+      </li>
+      <li>
+        <a class="analysis-card" href="faculty.html">
+          <svg class="analysis-icon" aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M8 18v-2a3 3 0 0 1 3-3h2a3 3 0 0 1 3 3v2M3 18v-1a3 3 0 0 1 3-3m15 4v-1a3 3 0 0 0-3-3"/><circle cx="12" cy="7" r="3"/></svg>
+          <h3>전임교원 계보</h3>
+          <p>노드 크기를 전임교원 수로 읽으며 학과 규모가 어떻게 바뀌었는지 봅니다.</p>
+          <span class="card-action">전임교원 규모 보기 <span aria-hidden="true">→</span></span>
+        </a>
+      </li>
+      </ul>
+    </section>
+    <section class="sec" id="method" aria-labelledby="method-title">
+      <h2 class="sec-tit" id="method-title">데이터 읽는 법</h2>
+      <div class="method-grid">
+        <div>
+          <h3>계보의 노드와 리본</h3>
+          <p>노드는 연도별 학과·학부입니다. 높이는 해당 학과·학부에 묶인 전공 수를 나타냅니다. 리본은 연도 사이의 연결이며, 대계열을 선택하면 학과명이 표시됩니다.</p>
+          <p>신설·통합·분리·폐지는 공시된 학과 상태입니다. 연도 간 연결은 학과코드·명칭·소계열로 추정했습니다. 2021년 이전은 명칭을 바탕으로 연결했습니다.</p>
+        </div>
+        <div>
+          <h3>대상과 집계 기준</h3>
+          <p>4년제 일반대·교육대와 일반대로 전환된 산업대의 활성 학과를 집계했습니다. 사이버대·방송통신대·각종학교, 무전공·교양·1학년 전용 과정과 단순 모집단위는 제외했습니다.</p>
+          <p>국립화 등에 따른 개명은 학교코드로 연결했습니다. 대학 간 통합은 별도로 표시합니다. 경상국립대(2022)와 강원대(2026) 사례에서 흡수된 대학의 학과는 통합 시점까지 하단에 따로 표시합니다.</p>
+        </div>
+      </div>
+      <p class="method-note">자료 출처는 대학알리미의 학교별 학부(과) 리스트입니다. <span id="data-version"></span></p>
+    </section>
+  </div>
+</main>
+<footer id="krds-footer">
+  <div class="inner footer-content">
+    <div>
+      <strong>대학 학과 변천사</strong>
+      <p>데이터 처리·시각화 <a href="https://github.com/Gahyoun">@dotch_gahyoun</a></p>
     </div>
-    <p class="mini">노드 크기는 학부/학과에 묶인 전공·학과 수, 리본(흐름) 두께는 연결의 규모입니다. 대계열을 선택하면 학과명 라벨이 또렷해집니다.
-      ‘신설·통합·분리·폐지’는 원자료의 학과상태에서 온 <span class="k">관측값</span>이고, 연도 간 <span class="k">연결</span>은 학과코드·명칭으로 <span class="k">추정한 값</span>입니다.</p>
-  </section>
-
-  <footer>
-    데이터: <a class="inl" href="https://www.academyinfo.go.kr" target="_blank" rel="noopener">대학알리미(academyinfo.go.kr)</a> 학교별 학부(과) 리스트 2014–2026.
-    연도 간 연결(연속·통합·분리)은 학과코드(2022년 이후)와 명칭·소계열에 기반한 추정이며, 코드가 없는 2021년 이전은 명칭 기반 추정입니다.
-    분류·통합 처리는 정규화와 추정을 포함하므로 실제와 다를 수 있습니다.
-    &nbsp;·&nbsp; 데이터 처리·시각화 by <a class="inl" href="https://github.com/Gahyoun" target="_blank" rel="noopener">@dotch_gahyoun</a>.
-    <div class="mini" style="margin-top:6px" id="ver">
-      <a class="inl" href="https://github.com/Gahyoun/korea-university-department-evolution/blob/main/docs/METHODOLOGY.md" target="_blank" rel="noopener">방법론</a> ·
-      <a class="inl" href="https://github.com/Gahyoun/korea-university-department-evolution/blob/main/docs/SCHEMA.md" target="_blank" rel="noopener">데이터 스키마</a> ·
-      <a class="inl" href="https://github.com/Gahyoun/korea-university-department-evolution" target="_blank" rel="noopener">소스</a>
-    </div>
-  </footer>
-</div>
-<script>
-  // 정적 데이터 API 매니페스트 -> 데이터 버전·빌드일 표기
-  fetch("manifest.json", {cache: "no-cache"}).then(r => r.json()).then(m => {
-    const el = document.getElementById("ver");
-    const d = (m.built_at || "").slice(0, 10);
-    el.insertAdjacentHTML("afterbegin",
-      `데이터 v${m.data_version} · 빌드 ${d} · ${m.stats.schools}개교 · ${m.source.coverage_years[0]}–${m.source.coverage_years[1]} &nbsp;·&nbsp; `);
-  }).catch(() => {});
-</script>
+    <ul class="footer-links" aria-label="데이터와 분석 문서">
+      <li><a href="https://www.academyinfo.go.kr">대학알리미 <span aria-hidden="true">↗</span></a></li>
+      <li><a href="https://github.com/Gahyoun/korea-university-department-evolution/blob/main/docs/METHODOLOGY.md">방법론 <span aria-hidden="true">↗</span></a></li>
+      <li><a href="https://github.com/Gahyoun/korea-university-department-evolution/blob/main/docs/SCHEMA.md">데이터 스키마 <span aria-hidden="true">↗</span></a></li>
+    </ul>
+  </div>
+</footer>
 </body>
 </html>

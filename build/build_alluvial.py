@@ -9,6 +9,21 @@ ROOT = os.path.dirname(HERE)
 OUT = os.path.join(ROOT, "out")
 ADIR = os.path.join(OUT, "alluvial")
 
+VIEWS = [
+    ("alluvial.html", "msz", "학과 계보",
+     "2014–2026년 대학별 학과의 신설·통합·분리·폐지 흐름입니다. 노드 높이는 학과·학부에 묶인 전공 수입니다."),
+    ("faculty.html", "ft", "전임교원 계보",
+     "2015–2025년 대학별 학과 계보입니다. 노드 높이는 전임교원 수이며, 회색 노드는 교원 수 미상입니다."),
+]
+
+def render(template, mode, title, sub):
+    current = ' aria-current="page"'
+    return (template.replace("__SIZE_MODE__", mode)
+                    .replace("__PAGE_TITLE__", title)
+                    .replace("__PAGE_SUB__", sub)
+                    .replace("__DEPARTMENT_CURRENT__", current if mode == "msz" else "")
+                    .replace("__FACULTY_CURRENT__", current if mode == "ft" else ""))
+
 def slug(s):
     return "".join(c if c.isalnum() else "_" for c in s)
 
@@ -65,15 +80,9 @@ def main():
     # write viewer html — 하나의 템플릿에서 크기 모드만 바꿔 두 페이지 생성(데이터 공유)
     with open(os.path.join(HERE, "alluvial_template.html"), encoding="utf-8") as f:
         tpl = f.read()
-    def render(mode, title, sub):
-        return (tpl.replace("__SIZE_MODE__", mode)
-                   .replace("__PAGE_TITLE__", title).replace("__PAGE_SUB__", sub))
-    with open(os.path.join(OUT, "alluvial.html"), "w", encoding="utf-8") as f:
-        f.write(render("msz", "학과 계보 Alluvial",
-                       "2014 기준 · 통합·분리·신설·폐지 · 노드 높이=전공/학과 수 · 대학알리미"))
-    with open(os.path.join(OUT, "faculty.html"), "w", encoding="utf-8") as f:
-        f.write(render("ft", "학과 계보 · 교수 수",
-                       "노드 높이=전임교원(교수) 수 · 2015–2025 · 회색=교수수 미상 · 대학알리미/how-large-academic-departments"))
+    for page, mode, title, sub in VIEWS:
+        with open(os.path.join(OUT, page), "w", encoding="utf-8") as f:
+            f.write(render(tpl, mode, title, sub))
     n_ft = sum(1 for s in index if s.get("hasft"))
     print("schools:", len(index), "| 교수데이터 학교:", n_ft, "| pages: alluvial.html, faculty.html")
 
