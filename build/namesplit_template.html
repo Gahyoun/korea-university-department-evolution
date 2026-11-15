@@ -1,90 +1,28 @@
-<!DOCTYPE html>
-<html lang="ko" data-krds-mode="light">
-<head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<title>학과명 분화 · 한국 대학 학과의 변천사</title>
-<link rel="stylesheet" href="assets/krds/primitives.css">
-<link rel="stylesheet" href="assets/krds/semantic.css">
-<link rel="stylesheet" href="assets/site.css">
-<link rel="stylesheet" href="assets/viewer.css">
-<script src="assets/site.js" defer></script>
-</head>
-<body>
-<div id="krds-skip-link"><a href="#contents">본문 바로가기</a></div>
-<header id="krds-header">
-  <div class="inner header-branding">
-    <a class="site-identity" href="index.html">대학 학과 변천사</a>
-    <div class="header-actions">
-      <label class="screen-mode" for="screen-mode">
-        <span class="sr-only">화면 설정</span>
-        <select id="screen-mode" title="화면 설정">
-          <option value="light">기본 화면</option>
-          <option value="high-contrast">선명한 화면</option>
-          <option value="theme">시스템 설정</option>
-        </select>
-      </label>
-      <a class="source-link" href="https://github.com/Gahyoun/korea-university-department-evolution">GitHub <span aria-hidden="true">↗</span></a>
-      <button class="btn-navi" type="button" aria-controls="primary-nav" aria-expanded="false" hidden>
-        <span class="menu-icon" aria-hidden="true">☰</span> 메뉴
-      </button>
-    </div>
-  </div>
-  <nav class="krds-main-menu" id="primary-nav" aria-label="주 메뉴">
-    <ul class="inner gnb-menu">
-      <li><a class="gnb-main-trigger" href="index.html">개요</a></li>
-      <li><a class="gnb-main-trigger" href="alluvial.html">학과 계보</a></li>
-      <li><a class="gnb-main-trigger" href="namesplit.html" aria-current="page">학과명 분화</a></li>
-      <li><a class="gnb-main-trigger" href="keywords.html">키워드 추이</a></li>
-      <li><a class="gnb-main-trigger" href="faculty.html">전임교원 계보</a></li>
-    </ul>
-  </nav>
-</header>
-<main id="contents" class="inner viewer" tabindex="-1">
-  <nav class="krds-breadcrumb-wrap" aria-label="현재 위치">
-    <ol class="breadcrumb"><li><a href="index.html">개요</a></li><li aria-current="page">학과명 분화</li></ol>
-  </nav>
-  <h1 class="page-title">학과명 분화</h1>
-  <p class="page-lead">2014–2026년 전국 대학의 학과명이 이어지고 갈라진 흐름입니다. 노드 높이는 같은 이름을 쓰는 대학 수입니다.</p>
-  <div class="filter-panel" role="group" aria-label="분석 필터">
-    <div class="filter-field"><label for="broad">대계열</label><select id="broad"></select></div>
-    <div class="filter-field"><label for="mid">중계열</label><select id="mid"></select></div>
-    <div class="filter-field"><label for="sub">소계열</label><select id="sub"></select></div>
-    <div class="filter-field"><label for="q">학과명 검색</label><input id="q" type="search" placeholder="학과명 입력" autocomplete="off"></div>
-    <label class="chk"><input type="checkbox" id="chgchk" checked> 분화·개명 표시</label>
-  </div>
-  <section class="chart-panel" aria-label="학과명 분화 차트">
-    <div class="chart-toolbar">
-      <div class="legend" id="legend" aria-label="범례"></div>
-      <div class="zoom-tools" aria-label="차트 확대 도구" role="group">
-        <button type="button" data-chart-zoom="out" aria-label="차트 축소">−</button>
-        <button type="button" data-chart-zoom="in" aria-label="차트 확대">+</button>
-        <button type="button" data-chart-zoom="reset">초기화</button>
-      </div>
-    </div>
-    <div id="info" role="status">데이터를 불러오는 중입니다.</div>
-    <div id="seriesbar"></div>
-    <p id="chart-help" class="chart-help">차트 안을 스크롤하거나 빈 곳을 끌어 이동하세요. 노드를 가리키거나 누르면 해당 계보가 강조됩니다.</p>
-    <div id="err" role="alert" hidden></div>
-    <div id="wrap" tabindex="0" aria-label="연도별 흐름 차트" aria-describedby="chart-help"><svg id="svg"></svg></div>
-  </section>
-</main>
-<footer id="krds-footer">
-  <div class="inner footer-content">
-    <div>
-      <strong>대학 학과 변천사</strong>
-      <p>데이터 처리·시각화 <a href="https://github.com/Gahyoun">@dotch_gahyoun</a></p>
-    </div>
-    <ul class="footer-links" aria-label="데이터와 분석 문서">
-      <li><a href="https://www.academyinfo.go.kr">대학알리미 <span aria-hidden="true">↗</span></a></li>
-      <li><a href="https://github.com/Gahyoun/korea-university-department-evolution/blob/main/docs/METHODOLOGY.md">방법론 <span aria-hidden="true">↗</span></a></li>
-      <li><a href="https://github.com/Gahyoun/korea-university-department-evolution/blob/main/docs/SCHEMA.md">데이터 스키마 <span aria-hidden="true">↗</span></a></li>
-    </ul>
-  </div>
-</footer>
-<div id="tip" role="tooltip"></div>
-<script src="assets/plot.js"></script>
-<script>
+<!-- filters -->
+        <div class="filter-field"><label for="broad">대계열</label><select id="broad"></select></div>
+        <div class="filter-field"><label for="mid">중계열</label><select id="mid"></select></div>
+        <div class="filter-field"><label for="sub">소계열</label><select id="sub"></select></div>
+        <div class="filter-field"><label for="q">학과명 검색</label><input id="q" type="search" placeholder="학과명 입력" autocomplete="off"></div>
+        <label class="chk"><input type="checkbox" id="chgchk" checked> 분화·개명 표시</label>
+          <p class="search-feedback" id="search-feedback" role="status" hidden></p>
+<!-- /filters -->
+<!-- chart -->
+      <div class="chart-toolbar">
+            <div class="legend" id="legend" aria-label="범례"></div>
+            <div class="zoom-tools" aria-label="차트 확대 도구" role="group">
+              <button type="button" data-chart-zoom="out" aria-label="차트 축소">−</button>
+              <button type="button" data-chart-zoom="in" aria-label="차트 확대">+</button>
+              <output id="zoom-level" aria-label="확대 비율">100%</output>
+            <button type="button" data-chart-zoom="fit">전체 맞춤</button>
+            <button type="button" data-chart-zoom="reset">초기화</button>
+            </div>
+          </div>
+          <div id="seriesbar"></div>
+          <p id="chart-help" class="chart-help">차트 안에서 스크롤하거나 끌어 이동할 수 있습니다. 노드를 선택하면 계보가 강조되고 아래에 상세 정보가 표시됩니다.</p>
+          <div id="err" role="alert" hidden></div>
+          <div id="wrap" tabindex="0" aria-label="연도별 흐름 차트" aria-describedby="chart-help"><svg id="svg" role="group" aria-label="연도별 흐름"></svg></div>
+<!-- /chart -->
+<!-- script -->
 const SVGNS="http://www.w3.org/2000/svg", $=id=>document.getElementById(id);
 let INDEX=null, DATA=null, HIER={}, ENTRY=null;
 const NODEW=13, COLGAP=170, PADTOP=50, PADL=70, GAP=2, COLTARGET=1250;
@@ -101,7 +39,8 @@ async function boot(){
   $("mid").onchange=()=>{ fillSub(); selectCurrent(); };
   $("sub").onchange=()=>{ const e=ENTRIES().find(x=>x.file===$("sub").value); if(e) selectEntry(e); };
   $("chgchk").onchange=()=>{if(DATA){layout();render();}};
-  $("q").oninput=highlight;
+  $("q").oninput=()=>{ resetPlotDetails(); highlight(); };
+  plotSearchJump($("q"));
   $("legend").innerHTML=
     `<span class="lg"><span class="sw" style="background:var(--new)"></span>신설명칭</span>`+
     `<span class="lg"><span class="sw" style="background:var(--split)"></span>분화(→타명칭)</span>`+
@@ -118,7 +57,7 @@ function fillSel(sel,arr){ sel.innerHTML=""; arr.forEach(v=>{const o=document.cr
 function fillMid(){ const b=$("broad").value; fillSel($("mid"), Object.keys(HIER[b]||{}).sort()); fillSub(); }
 function ENTRIES(){ const b=$("broad").value,m=$("mid").value; return (HIER[b]&&HIER[b][m])?HIER[b][m].slice().sort((a,b)=>a.sub.localeCompare(b.sub)):[]; }
 function fillSub(){ const sel=$("sub"); sel.innerHTML="";
-  ENTRIES().forEach(e=>{const o=document.createElement("option");o.value=e.file;o.textContent=`${e.sub} · 명칭 ${e.names} · 분화 ${e.splits}`;sel.appendChild(o);}); }
+  ENTRIES().forEach(e=>{const o=document.createElement("option");o.value=e.file;o.textContent=e.sub;sel.appendChild(o);}); }
 function selectCurrent(){
   const entry=ENTRIES().find(e=>e.file===$("sub").value);
   if(entry) selectEntry(entry);
@@ -131,7 +70,8 @@ async function fetchData(file){
   return response.json();
 }
 function showError(){
-  $("info").textContent="표시할 데이터가 없습니다.";
+  updateAnalysisResult("분석 결과를 표시할 수 없습니다.", "");
+  plotSearchFeedback("", 0);
   $("err").textContent="데이터를 불러오지 못했습니다. 다른 항목을 선택하거나 페이지를 새로고침해 주세요.";
   $("err").hidden=false;
 }
@@ -140,6 +80,7 @@ async function load(file){
   $("err").hidden=true;
   $("info").textContent="데이터를 불러오는 중입니다.";
   $("tip").style.display="none";
+  resetPlotDetails();
   try {
     const result=await fetchData(file);
     if(id!==requestId) return;
@@ -163,20 +104,23 @@ function seriesBar(e){
     if(i%2===0||i===n-1) bars+=`<text x="${x+bw/2}" y="${H-2}" font-size="8" fill="var(--gk-text-subtle)" text-anchor="middle">'${String(Y[i]).slice(2)}</text>`;
     bars+=`<text x="${x+bw/2}" y="${y-2}" font-size="8" fill="var(--gk-text)" text-anchor="middle">${tot[i]||""}</text>`;
   }
-  const a=tot[0], b=tot[n-1], d=b-a, pct=a?Math.round(d/a*100):0;
+  const a=tot[0], b=tot[n-1], d=b-a, pct=a?Math.round(d/a*100):null;
   const cls=d>=0?"up":"down", sign=d>=0?"+":"";
   $("seriesbar").innerHTML=
-    `<div class="cap">계열 학과 수<br><b>${a}</b> <span style="color:var(--gk-text-subtle)">'14</span> → <b>${b}</b> <span style="color:var(--gk-text-subtle)">'26</span> `+
-    `<span class="${cls}">${sign}${d} (${sign}${pct}%)</span></div>`+
+    `<div class="cap">계열 학과 수<br><b>${a}</b> <span style="color:var(--gk-text-subtle)">${Y[0]}년</span> → <b>${b}</b> <span style="color:var(--gk-text-subtle)">${Y.at(-1)}년</span> `+
+    `<span class="${cls}">${sign}${d}${pct===null?"":` (${sign}${pct}%)`}</span></div>`+
     `<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="연도별 계열 학과 수">${bars}</svg>`;
 }
 function chgOn(){return $("chgchk").checked;}
 function visL(l){ return chgOn() || l[2]===0; }   // l[2]=kind 0=cont, 3=change
 function buildInfo(){
-  const N=DATA.nodes,y=DATA.years; let nnew=0,nsp=0,nme=0;
-  N.forEach(n=>{const c=n[5]; if(c&1)nnew++; if(c&4)nsp++; if(c&2)nme++;});
-  $("info").innerHTML=[`<b>${DATA.sub}</b> · ${DATA.broad}`,`${y[0]}–${y[y.length-1]}`,
-    `명칭 <b>${N.length}</b>(노드) · 신설 <b>${nnew}</b> · 분화 <b>${nsp}</b> · 개명/유입 <b>${nme}</b>`].join(" &nbsp;|&nbsp; ");
+  const years=DATA.years;
+  updateAnalysisResult(DATA.sub,
+    `${DATA.broad} › ${ENTRY.mid} · ${years[0]}–${years.at(-1)}`, [
+      ["기간 내 고유 명칭",`${numberFormat.format(ENTRY.names)}개`],
+      [`${years.at(-1)}년 표시 명칭`,`${numberFormat.format(ENTRY.cur)}개`],
+      ["기간 내 분화·개명 연결",`${numberFormat.format(ENTRY.splits)}건`],
+    ]);
 }
 // layout
 let POS=null,PPU=1,VYEARS=[];
@@ -197,6 +141,7 @@ function layout(){
   POS._maxH=maxH; POS._cols=cols; POS._yidx=yidx;
 }
 function render(){
+  resetPlotDetails();
   const svg=$("svg"); svg.innerHTML=""; const N=DATA.nodes;
   const W=PADL+(VYEARS.length-1)*COLGAP+280, H=POS._maxH+20;
   svg.setAttribute("viewBox",`0 0 ${W} ${H}`); svg.setAttribute("width",W); svg.setAttribute("height",H);
@@ -234,7 +179,7 @@ function render(){
       const t=el("text",{class:"nlabel"+(big?" big":""),x:p.x+NODEW+4,y:p.y+p.h/2});
       t.textContent=n[1].length>20?n[1].slice(0,20)+"…":n[1]; g.appendChild(t);}
     g.addEventListener("mouseenter",e=>showTip(e,i)); g.addEventListener("mousemove",moveTip); g.addEventListener("mouseleave",hideTip);
-    g.addEventListener("click",e=>showTip(e,i));
+    configurePlotTarget(g, `${n[0]}년 ${n[1]}`, event=>showTip(event,i));
     ng.appendChild(g);
   });
   $("wrap").dispatchEvent(new Event("chart-render"));
@@ -248,16 +193,40 @@ function showTip(e,i){ const n=DATA.nodes[i],t=$("tip");
   t.style.display="block"; moveTip(e); hl(i);
 }
 function moveTip(e){positionPlotTip(e);}
-function hideTip(){$("tip").style.display="none"; highlight();}
+function hideTip(){$("tip").style.display="none"; const selected=$("svg").querySelector(".is-selected"); if(selected) hl(Number(selected.dataset.id)); else highlight(false);}
 let NB=null;
 function nb(){if(NB)return NB;const f={},b={};DATA.links.forEach(l=>{if(!visL(l))return;(f[l[0]]=f[l[0]]||[]).push(l[1]);(b[l[1]]=b[l[1]]||[]).push(l[0]);});return NB={f,b};}
 function lineage(s){const {f,b}=nb();const seen=new Set([s]),st=[s];while(st.length){const x=st.pop();[...(f[x]||[]),...(b[x]||[])].forEach(y=>{if(!seen.has(y)){seen.add(y);st.push(y);}});}return seen;}
 function hl(i){const s=lineage(i);document.querySelectorAll("[data-id]").forEach(g=>g.classList.toggle("dim",!s.has(+g.dataset.id)));document.querySelectorAll(".ribbon").forEach(p=>p.classList.toggle("dim",!(s.has(+p.dataset.s)&&s.has(+p.dataset.t))));}
 function clearHL(){document.querySelectorAll(".dim").forEach(e=>e.classList.remove("dim"));NB=null;}
-function highlight(){NB=null;if(!DATA)return; const q=$("q").value.trim().toLocaleLowerCase("ko-KR");if(!q){clearHL();return;}const u=new Set();DATA.nodes.forEach((n,i)=>{if(n[1].toLocaleLowerCase("ko-KR").includes(q))lineage(i).forEach(x=>u.add(x));});
-  document.querySelectorAll("[data-id]").forEach(g=>g.classList.toggle("dim",!u.has(+g.dataset.id)));document.querySelectorAll(".ribbon").forEach(p=>p.classList.toggle("dim",!(u.has(+p.dataset.s)&&u.has(+p.dataset.t))));}
+function highlight(updateFocus=true){
+  NB=null;
+  const term=$("q").value.trim();
+  const query=term.toLocaleLowerCase("ko-KR");
+  const matches=new Set();
+  const related=new Set();
+  if (DATA && query) {
+    DATA.nodes.forEach((n,i)=>{
+      if (n[1].toLocaleLowerCase("ko-KR").includes(query)) {
+        matches.add(i);
+        lineage(i).forEach(id=>related.add(id));
+      }
+    });
+  }
+  document.querySelectorAll("#svg [data-id]").forEach(node=>{
+    const id=Number(node.dataset.id);
+    node.toggleAttribute("data-match",matches.has(id));
+    node.classList.toggle("dim",related.size>0 && !related.has(id));
+  });
+  document.querySelectorAll("#svg .ribbon").forEach(path=>{
+    const connected=related.has(Number(path.dataset.s)) && related.has(Number(path.dataset.t));
+    path.classList.toggle("dim",related.size>0 && !connected);
+  });
+  if (updateFocus) {
+    plotSearchFeedback(term,matches.size);
+    enableFirstPlotTarget();
+  }
+}
 function el(tag,attr){const e=document.createElementNS(SVGNS,tag);for(const k in attr)e.setAttribute(k,attr[k]);return e;}
 boot();
-</script>
-</body>
-</html>
+<!-- /script -->

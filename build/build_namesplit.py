@@ -11,6 +11,8 @@ out/namesplit.html (뷰어)
 """
 import json, os, re, collections
 
+from render_viewer import render_viewer
+
 HERE = os.path.dirname(os.path.abspath(__file__))
 ROOT = os.path.dirname(HERE)
 ND = os.path.join(ROOT, "out", "namesplit")
@@ -136,9 +138,8 @@ def main():
     index.sort(key=lambda x: (x["broad"], x["mid"], x["sub"]))
     with open(os.path.join(ND, "_index.json"), "w", encoding="utf-8") as f:
         json.dump({"years": YEARS, "subs": index}, f, ensure_ascii=False)
-    html = open(os.path.join(HERE, "namesplit_template.html"), encoding="utf-8").read()
     with open(os.path.join(ROOT, "out", "namesplit.html"), "w", encoding="utf-8") as f:
-        f.write(html)
+        f.write(render_viewer("namesplit"))
     print("subs:", len(index), "| top:", [s["sub"] for s in index[:6]])
     # 예시
     for k in index:

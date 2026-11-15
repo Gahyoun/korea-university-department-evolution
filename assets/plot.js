@@ -21,6 +21,7 @@ if (chartViewport) {
     const left = (chartViewport.scrollLeft + x) * ratio - x;
     const top = (chartViewport.scrollTop + y) * ratio - y;
     scale = next;
+    document.getElementById("zoom-level").textContent = Math.round(scale * 100) + "%";
     chart.style.width = `${width * scale}px`;
     chart.style.height = `${height * scale}px`;
     chartViewport.scrollTo(left, top);
@@ -34,9 +35,12 @@ if (chartViewport) {
   document.querySelectorAll("[data-chart-zoom]").forEach(button => {
     button.addEventListener("click", () => {
       const action = button.dataset.chartZoom;
-      const next = action === "reset" ? 1 : action === "in" ? scale * 1.25 : scale / 1.25;
-      updateZoom(Math.max(.4, Math.min(3, next)), chartViewport.clientWidth / 2, chartViewport.clientHeight / 2);
-      if (action === "reset") chartViewport.scrollTo(0, 0);
+      const width = Number(chart.getAttribute("width"));
+      const fitted = Math.min(1, chartViewport.clientWidth / width);
+      const scales = {reset: 1, fit: fitted, in: scale * 1.25, out: scale / 1.25};
+      const next = scales[action];
+      updateZoom(action === "fit" ? next : Math.max(.1, Math.min(3, next)), chartViewport.clientWidth / 2, chartViewport.clientHeight / 2);
+      if (action === "reset" || action === "fit") chartViewport.scrollTo(0, 0);
     });
   });
 
@@ -45,7 +49,7 @@ if (chartViewport) {
     event.preventDefault();
     const bounds = chartViewport.getBoundingClientRect();
     const next = scale * (event.deltaY < 0 ? 1.15 : 1 / 1.15);
-    updateZoom(Math.max(.4, Math.min(3, next)), event.clientX - bounds.left, event.clientY - bounds.top);
+    updateZoom(Math.max(.1, Math.min(3, next)), event.clientX - bounds.left, event.clientY - bounds.top);
   }, {passive: false});
 
   chart.addEventListener("pointerdown", event => {

@@ -10,6 +10,8 @@ records.json -> out/keywords.html (자체완결 데이터 임베드)
 import json, os, re, collections
 from kiwipiepy import Kiwi
 
+from render_viewer import render_viewer
+
 HERE = os.path.dirname(os.path.abspath(__file__))
 ROOT = os.path.dirname(HERE)
 
@@ -94,11 +96,9 @@ def main():
 
     payload = {"years":years, "broads":broads, "data":data, "examples":ex}
     os.makedirs(os.path.join(ROOT,"out"), exist_ok=True)
-    with open(os.path.join(HERE,"keywords_template.html"), encoding="utf-8") as f:
-        html=f.read()
-    html = html.replace("/*__DATA__*/","const PAYLOAD="+json.dumps(payload, ensure_ascii=False)+";")
+    script = "const PAYLOAD=" + json.dumps(payload, ensure_ascii=False) + ";"
     with open(os.path.join(ROOT,"out","keywords.html"),"w",encoding="utf-8") as f:
-        f.write(html)
+        f.write(render_viewer("keywords", script))
     print("keywords:",len(used_kw),"| top overall:",[k for k,_ in kw_total.most_common(15)])
 
 if __name__=="__main__":

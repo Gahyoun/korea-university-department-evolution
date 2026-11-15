@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="ko" data-krds-mode="light">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>__PAGE_TITLE__ · 한국 대학 학과의 변천사</title>
+<link rel="stylesheet" href="assets/krds/primitives.css">
+<link rel="stylesheet" href="assets/krds/semantic.css">
+<link rel="stylesheet" href="assets/site.css">
+<link rel="stylesheet" href="assets/viewer.css">
+<script src="assets/site.js" defer></script>
+</head>
+<body>
+<div id="krds-skip-link"><a href="#contents">본문 바로가기</a></div>
+<header id="krds-header">
+  <div class="inner header-branding">
+    <a class="site-identity" href="index.html">대학 학과 변천사</a>
+    <div class="header-actions">
+      <label class="screen-mode" for="screen-mode">
+        <span class="sr-only">화면 설정</span>
+        <select id="screen-mode" title="화면 설정">
+          <option value="light">기본 화면</option>
+          <option value="high-contrast">선명한 화면</option>
+          <option value="theme">시스템 설정</option>
+        </select>
+      </label>
+      <a class="source-link" href="https://github.com/Gahyoun/korea-university-department-evolution">GitHub <span aria-hidden="true">↗</span></a>
+      <button class="btn-navi" type="button" aria-controls="primary-nav" aria-expanded="false" hidden>
+        <span class="menu-icon" aria-hidden="true">☰</span> 메뉴
+      </button>
+    </div>
+  </div>
+  <nav class="krds-main-menu" id="primary-nav" aria-label="주 메뉴">
+    <ul class="inner gnb-menu">
+      <li><a class="gnb-main-trigger" href="index.html">개요</a></li>
+      <li><a class="gnb-main-trigger" href="alluvial.html"__DEPARTMENT_CURRENT__>학과 계보</a></li>
+      <li><a class="gnb-main-trigger" href="namesplit.html"__NAMES_CURRENT__>학과명 분화</a></li>
+      <li><a class="gnb-main-trigger" href="keywords.html"__KEYWORDS_CURRENT__>키워드 추이</a></li>
+      <li><a class="gnb-main-trigger" href="faculty.html"__FACULTY_CURRENT__>전임교원 계보</a></li>
+    </ul>
+  </nav>
+</header>
+<main id="contents" class="viewer" tabindex="-1">
+  <div class="analysis-intro">
+    <div class="inner">
+      <nav class="krds-breadcrumb-wrap" aria-label="현재 위치">
+        <ol class="breadcrumb"><li><a href="index.html">개요</a></li><li aria-current="page">__PAGE_TITLE__</li></ol>
+      </nav>
+      <h1 class="page-title">__PAGE_TITLE__</h1>
+      <p class="page-lead">__PAGE_SUB__</p>
+    </div>
+  </div>
+  <div class="inner analysis-layout">
+    <nav class="krds-in-page-navigation-type" aria-label="이 페이지의 구성">
+      <p>이 페이지의 구성</p>
+      <ul>
+        <li><a href="#filters" aria-current="location">조건 설정</a></li>
+        <li><a href="#results">분석 결과</a></li>
+        <li><a href="#read-guide">읽는 법</a></li>
+      </ul>
+    </nav>
+    <div class="analysis-content">
+      <section class="sec" id="filters" aria-labelledby="filters-title">
+        <h2 class="sec-tit" id="filters-title">조건 설정</h2>
+        <div class="filter-panel" role="group" aria-labelledby="filters-title">
+__FILTERS__
+        </div>
+      </section>
+      <section class="sec" id="results" aria-labelledby="results-title">
+        <h2 class="sec-tit" id="results-title">분석 결과</h2>
+        <div class="chart-panel">
+          <div class="result-heading">
+            <h3 id="result-title">__PAGE_TITLE__</h3>
+            <p id="info" role="status">데이터를 불러오는 중입니다.</p>
+          </div>
+          <dl class="result-metrics" id="result-metrics" hidden></dl>
+__CHART__
+          <div class="chart-details" id="chart-details" tabindex="-1" aria-labelledby="details-title">
+            <h4 id="details-title">선택 항목 상세</h4>
+            <div id="details-content" aria-live="polite"><p>__DETAIL_INSTRUCTION__</p></div>
+          </div>
+        </div>
+      </section>
+      <section class="sec" id="read-guide" aria-labelledby="guide-title">
+        <h2 class="sec-tit" id="guide-title">읽는 법</h2>
+        <dl class="analysis-guide">
+__GUIDE__
+        </dl>
+      </section>
+    </div>
+  </div>
+</main>
+<footer id="krds-footer">
+  <div class="inner footer-content">
+    <div>
+      <strong>대학 학과 변천사</strong>
+      <p>데이터 처리·시각화 <a href="https://github.com/Gahyoun">@dotch_gahyoun</a></p>
+    </div>
+    <ul class="footer-links" aria-label="데이터와 분석 문서">
+      <li><a href="https://www.academyinfo.go.kr">대학알리미 <span aria-hidden="true">↗</span></a></li>
+      <li><a href="https://github.com/Gahyoun/korea-university-department-evolution/blob/main/docs/METHODOLOGY.md">방법론 <span aria-hidden="true">↗</span></a></li>
+      <li><a href="https://github.com/Gahyoun/korea-university-department-evolution/blob/main/docs/SCHEMA.md">데이터 스키마 <span aria-hidden="true">↗</span></a></li>
+    </ul>
+  </div>
+</footer>
+<div id="tip" role="tooltip"></div>
+<script src="assets/analysis.js"></script>
+<script src="assets/plot.js"></script>
+<script>
+__SCRIPT__
+</script>
+</body>
+</html>
