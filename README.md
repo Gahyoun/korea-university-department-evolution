@@ -15,6 +15,13 @@
 | [`alluvial.html`](alluvial.html) | **학과 계보 Alluvial** — 대학 선택(가나다) → 2014~2026 학과 흐름. 노드 크기=학부/학과에 묶인 전공 수. 학부 통폐합으로 굵어지고 분리로 가늘어진다. 대계열 필터 시 학과명 라벨 표시. 학교통합은 상·하 밴드. |
 | [`namesplit.html`](namesplit.html) | **소계열 학과명 분화 Alluvial** — 대계열▸중계열▸소계열 계층 선택 → 전국 대학에서 학과 "이름"이 어떻게 이어지고 갈라지는지. 노드=명칭, 크기=학교 수. 상단에 계열 학과 수 증감 스트립. |
 | [`keywords.html`](keywords.html) | **학과명 키워드 Temporal** — 신설/활성 학과명 키워드의 연도별 버블 + 급상승 랭킹(융합·AI·반도체·스마트…). |
+| [`faculty.html`](faculty.html) | **전임교원 계보** — 2015–2025년 학과 계보에 대학알리미 전임교원 수를 표시합니다. |
+
+## 화면 디자인
+
+[GNU × KRDS Figma Design](https://www.figma.com/design/GU2WxBTzIh8tyh4eRiMX6H?node-id=3-1968)에 네 분석 페이지의 데스크톱·모바일과 선명한 화면 예시가 있습니다.
+공통 구조는 [`build/viewer_layout.html`](build/viewer_layout.html), 화면별 차트는 `build/*_template.html`에서 관리합니다.
+Figma 화면 색 변수의 Web 코드 이름은 [GNU × KRDS 토큰](assets/krds/semantic.css)과 분석 화면의 [CSS](assets/viewer.css)에 대응합니다.
 
 ## 정보이론·통계물리 분석
 

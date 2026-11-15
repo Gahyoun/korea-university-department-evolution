@@ -40,38 +40,79 @@
     </ul>
   </nav>
 </header>
-<main id="contents" class="inner viewer" tabindex="-1">
-  <nav class="krds-breadcrumb-wrap" aria-label="현재 위치">
-    <ol class="breadcrumb"><li><a href="index.html">개요</a></li><li aria-current="page">전임교원 계보</li></ol>
-  </nav>
-  <h1 class="page-title">전임교원 계보</h1>
-  <p class="page-lead">2015–2025년 대학별 학과 계보입니다. 노드 높이는 전임교원 수이며, 회색 노드는 교원 수 미상입니다.</p>
-  <div class="filter-panel" role="group" aria-label="분석 필터">
-    <div class="filter-field"><label for="school">대학</label><select id="school"></select></div>
-    <div class="filter-field"><label for="broad">대계열</label><select id="broad">
-      <option value="ALL">전체</option>
-      <option value="인문사회">인문사회</option><option value="공학">공학</option>
-      <option value="자연과학">자연과학</option><option value="예체능">예체능</option>
-      <option value="의학">의학</option>
-    </select></div>
-    <div class="filter-field"><label for="q">학과명 검색</label><input id="q" type="search" placeholder="학과명 입력" autocomplete="off"></div>
-    <label class="chk"><input type="checkbox" id="softchk" checked> 재편·개명 표시</label>
-  </div>
-  <section class="chart-panel" aria-label="전임교원 계보 차트">
-    <div class="chart-toolbar">
-      <div class="legend" id="legend" aria-label="범례"></div>
-      <div class="zoom-tools" aria-label="차트 확대 도구" role="group">
-        <button type="button" data-chart-zoom="out" aria-label="차트 축소">−</button>
-        <button type="button" data-chart-zoom="in" aria-label="차트 확대">+</button>
-        <button type="button" data-chart-zoom="reset">초기화</button>
-      </div>
+<main id="contents" class="viewer" tabindex="-1">
+  <div class="analysis-intro">
+    <div class="inner">
+      <nav class="krds-breadcrumb-wrap" aria-label="현재 위치">
+        <ol class="breadcrumb"><li><a href="index.html">개요</a></li><li aria-current="page">전임교원 계보</li></ol>
+      </nav>
+      <h1 class="page-title">전임교원 계보</h1>
+      <p class="page-lead">2015–2025년 학과 계보에서 전임교원 규모가 어떻게 달라졌는지 살펴봅니다.</p>
     </div>
-    <div id="info" role="status">데이터를 불러오는 중입니다.</div>
+  </div>
+  <div class="inner analysis-layout">
+    <nav class="krds-in-page-navigation-type" aria-label="이 페이지의 구성">
+      <p>이 페이지의 구성</p>
+      <ul>
+        <li><a href="#filters" aria-current="location">조건 설정</a></li>
+        <li><a href="#results">분석 결과</a></li>
+        <li><a href="#read-guide">읽는 법</a></li>
+      </ul>
+    </nav>
+    <div class="analysis-content">
+      <section class="sec" id="filters" aria-labelledby="filters-title">
+        <h2 class="sec-tit" id="filters-title">조건 설정</h2>
+        <div class="filter-panel" role="group" aria-labelledby="filters-title">
+        <div class="filter-field"><label for="school">대학</label><select id="school"></select></div>
+        <div class="filter-field"><label for="broad">대계열</label><select id="broad">
+          <option value="ALL">전체</option>
+          <option value="인문사회">인문사회</option><option value="공학">공학</option>
+          <option value="자연과학">자연과학</option><option value="예체능">예체능</option>
+          <option value="의학">의학</option>
+        </select></div>
+        <div class="filter-field"><label for="q">학과명 검색</label><input id="q" type="search" placeholder="학과명 입력" autocomplete="off"></div>
+        <label class="chk"><input type="checkbox" id="softchk" checked> 재편·개명 표시</label>
+          <p class="search-feedback" id="search-feedback" role="status" hidden></p>
+        </div>
+      </section>
+      <section class="sec" id="results" aria-labelledby="results-title">
+        <h2 class="sec-tit" id="results-title">분석 결과</h2>
+        <div class="chart-panel">
+          <div class="result-heading">
+            <h3 id="result-title">전임교원 계보</h3>
+            <p id="info" role="status">데이터를 불러오는 중입니다.</p>
+          </div>
+          <dl class="result-metrics" id="result-metrics" hidden></dl>
+      <div class="chart-toolbar">
+            <div class="legend" id="legend" aria-label="범례"></div>
+            <div class="zoom-tools" aria-label="차트 확대 도구" role="group">
+              <button type="button" data-chart-zoom="out" aria-label="차트 축소">−</button>
+              <button type="button" data-chart-zoom="in" aria-label="차트 확대">+</button>
+              <output id="zoom-level" aria-label="확대 비율">100%</output>
+            <button type="button" data-chart-zoom="fit">전체 맞춤</button>
+            <button type="button" data-chart-zoom="reset">초기화</button>
+            </div>
+          </div>
 
-    <p id="chart-help" class="chart-help">차트 안을 스크롤하거나 빈 곳을 끌어 이동하세요. 노드를 가리키거나 누르면 해당 계보가 강조됩니다.</p>
-    <div id="err" role="alert" hidden></div>
-    <div id="wrap" tabindex="0" aria-label="연도별 흐름 차트" aria-describedby="chart-help"><svg id="svg"></svg></div>
-  </section>
+          <p id="chart-help" class="chart-help">차트 안에서 스크롤하거나 끌어 이동할 수 있습니다. 노드를 선택하면 계보가 강조되고 아래에 상세 정보가 표시됩니다.</p>
+          <div id="err" role="alert" hidden></div>
+          <div id="wrap" tabindex="0" aria-label="연도별 흐름 차트" aria-describedby="chart-help"><svg id="svg" role="group" aria-label="연도별 흐름"></svg></div>
+          <div class="chart-details" id="chart-details" tabindex="-1" aria-labelledby="details-title">
+            <h4 id="details-title">선택 항목 상세</h4>
+            <div id="details-content" aria-live="polite"><p>노드를 선택하면 전임교원 수와 값의 출처를 확인할 수 있습니다.</p></div>
+          </div>
+        </div>
+      </section>
+      <section class="sec" id="read-guide" aria-labelledby="guide-title">
+        <h2 class="sec-tit" id="guide-title">읽는 법</h2>
+        <dl class="analysis-guide">
+          <div><dt>노드 높이</dt><dd>전임교원 수입니다. 회색 노드는 교원 수가 미상인 학과입니다.</dd></div>
+          <div><dt>관측과 추정</dt><dd>상세에서 공시 관측값, 계보 추정값, 미상 여부를 확인할 수 있습니다. 결과 요약의 교원 합계에는 관측값과 추정값이 포함됩니다.</dd></div>
+          <div><dt>연도 범위</dt><dd>전임교원 자료가 있는 2015–2025년을 표시합니다.</dd></div>
+        </dl>
+      </section>
+    </div>
+  </div>
 </main>
 <footer id="krds-footer">
   <div class="inner footer-content">
@@ -87,6 +128,7 @@
   </div>
 </footer>
 <div id="tip" role="tooltip"></div>
+<script src="assets/analysis.js"></script>
 <script src="assets/plot.js"></script>
 <script>
 const SVGNS="http://www.w3.org/2000/svg", $=id=>document.getElementById(id);
@@ -106,15 +148,13 @@ async function boot(){
   catch { showError(); return; }
   const sel=$("school");
   INDEX.schools.forEach(s=>{const o=document.createElement("option");o.value=s.file;
-    o.textContent = (SIZE_MODE==="ft"
-        ? `${s.school} · 교수 ${s.ftcur||0}명`
-        : `${s.school} · 2014:${s.base}→현재:${s.cur}`)
-      + (s.trib.length?` · ▼통합 ${s.trib.join(",")}`:"");
+    o.textContent=s.school;
     sel.appendChild(o);});
   sel.onchange=()=>load(sel.value);
-  $("broad").onchange=()=>{selBroad=$("broad").value; if(DATA){layout(); render();}};
+  $("broad").onchange=()=>{selBroad=$("broad").value; if(DATA){layout(); render(); buildInfo();}};
   $("softchk").onchange=()=>{if(DATA){layout();render();}};
-  $("q").oninput=highlight;
+  $("q").oninput=()=>{ resetPlotDetails(); highlight(); };
+  plotSearchJump($("q"));
   const qp=new URLSearchParams(location.search); let startFile=INDEX.schools[0].file;
   if(qp.get("school")){const m=INDEX.schools.find(s=>s.school.includes(qp.get("school"))); if(m){startFile=m.file;sel.value=m.file;}}
   if([...$("broad").options].some(option=>option.value===qp.get("broad"))){selBroad=qp.get("broad"); $("broad").value=selBroad;}
@@ -127,7 +167,8 @@ async function fetchData(file){
   return response.json();
 }
 function showError(){
-  $("info").textContent="표시할 데이터가 없습니다.";
+  updateAnalysisResult("분석 결과를 표시할 수 없습니다.", "");
+  plotSearchFeedback("", 0);
   $("err").textContent="데이터를 불러오지 못했습니다. 다른 항목을 선택하거나 페이지를 새로고침해 주세요.";
   $("err").hidden=false;
 }
@@ -136,6 +177,7 @@ async function load(file){
   $("err").hidden=true;
   $("info").textContent="데이터를 불러오는 중입니다.";
   $("tip").style.display="none";
+  resetPlotDetails();
   try {
     const result=await fetchData(file);
     if(id!==requestId) return;
@@ -163,12 +205,32 @@ function buildLegend(){
      `<span class="lg"><span class="sw" style="background:var(--missing)"></span>교원 수 미상</span>` : "");
 }
 function buildInfo(){
-  const y=DATA.years.filter(yearOK); let nnew=0,nmer=0,nspl=0,ndead=0;
-  DATA.nodes.forEach(n=>{const c=n[5]; if(n[7]!==0)return; if(c&1)nnew++; if(c&2)nmer++; if(c&4)nspl++; if(c&8)ndead++;});
-  let p=[`<b>${DATA.school}</b> · ${y[0]}–${y[y.length-1]}`, `2014 기준학과 <b>${DATA.base2014}</b>`,
-    `신설 <b>${nnew}</b> · 통합 <b>${nmer}</b> · 분리 <b>${nspl}</b> · 폐지 <b>${ndead}</b>`];
-  if(DATA.bands.length) p.push("학교통합 ▼ "+DATA.bands.map(b=>`<b>${b.name}</b> → ${b.year} 합류`).join(" · "));
-  $("info").innerHTML=p.join(" &nbsp;|&nbsp; ");
+  const years=DATA.years.filter(yearOK);
+  const latest=years.at(-1);
+  const selected=DATA.nodes.filter(node=>node[7]===0 && visN(node));
+  const recent=selected.filter(node=>node[0]===latest);
+  const range=`${years[0]}–${latest}`;
+  const scope=selBroad==="ALL"?"전체 대계열":selBroad;
+  const context=[scope, range];
+  if (DATA.bands.length) {
+    context.push(...DATA.bands.map(band=>`${band.name} ${band.year}년 합류`));
+  }
+  const count=(value,unit)=>`${numberFormat.format(value)}${unit}`;
+  const metrics=[[`${latest}년 학과·학부`,count(recent.length,"개")]];
+  if (SIZE_MODE==="ft") {
+    const recorded=recent.filter(node=>node[8]!=null);
+    const total=recorded.reduce((sum,node)=>sum+node[8],0);
+    metrics.push(
+      ["전임교원 합계",recorded.length?count(total,"명"):"미상"],
+      ["교원 수 미상 학과·학부",count(recent.length-recorded.length,"개")]
+    );
+  } else {
+    metrics.push(
+      ["기간 내 신설 기록",count(selected.filter(node=>node[5]&1).length,"건")],
+      ["기간 내 통합·분리 기록",count(selected.filter(node=>node[5]&6).length,"건")]
+    );
+  }
+  updateAnalysisResult(DATA.school,context.join(" · "),metrics);
 }
 
 // ---------- layout (밴드 적층) ----------
@@ -226,6 +288,7 @@ function layout(){
 // ---------- render ----------
 function nodeFill(n){ if(ftNull(n)) return "var(--missing)"; return selBroad==="ALL" ? "var(--node)" : subColor(n[2]); }
 function render(){
+  resetPlotDetails();
   const svg=$("svg"); svg.innerHTML=""; const N=DATA.nodes;
   const W=PADL+(VYEARS.length-1)*COLGAP+260, H=POS._maxH+20;
   svg.setAttribute("viewBox",`0 0 ${W} ${H}`); svg.setAttribute("width",W); svg.setAttribute("height",H);
@@ -298,7 +361,7 @@ function render(){
       const t=el("text",{class:"nlabel"+(big?" big":""),x:p.x+NODEW+4,y:p.y+p.h/2});
       const lim=single?22:14; t.textContent=n[1].length>lim?n[1].slice(0,lim)+"…":n[1]; g.appendChild(t);}
     g.addEventListener("mouseenter",e=>showTip(e,i)); g.addEventListener("mousemove",moveTip); g.addEventListener("mouseleave",hideTip);
-    g.addEventListener("click",e=>showTip(e,i));
+    configurePlotTarget(g, `${n[0]}년 ${n[1]}`, event=>showTip(event,i));
     ng.appendChild(g);
   });
   $("wrap").dispatchEvent(new Event("chart-render"));
@@ -312,12 +375,13 @@ function showTip(e,i){ const n=DATA.nodes[i], t=$("tip");
   let ev=EVB.filter(b=>n[5]&b[0]).map(b=>`<span class="badge" style="color:var(--${b[1]},var(--gk-text-subtle))">${b[2]}</span>`).join("");
   let mem=(n[6]&&n[6].length>1)?`<div class="mem">전공 ${n[6].length}: `+n[6].join(" / ")+`</div>`:"";
   let bnd=n[7]!==0?` <span style="color:var(--school)">[${(DATA.bands[n[7]-1]||{}).name||""}]</span>`:"";
-  const ftt = n[8]==null ? "교수 미상" : `교수 ${n[8]}명${n[9]===1?"(계보추정)":""}`;
+  const provenance=n[9]===1?"계보 추정":n[9]===0?"공시 관측":"출처 미상";
+  const ftt=n[8]==null?"전임교원 수 미상":`전임교원 ${numberFormat.format(n[8])}명 (${provenance})`;
   t.innerHTML=`<div class="d">${n[1]}${bnd}</div><div class="m">${n[0]}년 · ${n[3]} › ${n[2]} · 전공 ${n[4]} · ${ftt}</div>${ev?`<div>${ev}</div>`:""}${mem}`;
   t.style.display="block"; moveTip(e); hl(i);
 }
 function moveTip(e){positionPlotTip(e);}
-function hideTip(){$("tip").style.display="none"; highlight();}
+function hideTip(){$("tip").style.display="none"; const selected=$("svg").querySelector(".is-selected"); if(selected) hl(Number(selected.dataset.id)); else highlight(false);}
 let NB=null;
 function nb(){ if(NB)return NB; const f={},b={};
   DATA.links.forEach(l=>{ const xb=l[4]===1; if(!xb&&!visL(l))return; if(xb&&l[2]===3&&!softOn())return;
@@ -328,10 +392,34 @@ function hl(i){const s=lineage(i);
   document.querySelectorAll("[data-id]").forEach(g=>g.classList.toggle("dim",!s.has(+g.dataset.id)));
   document.querySelectorAll(".ribbon").forEach(p=>p.classList.toggle("dim",!(s.has(+p.dataset.s)&&s.has(+p.dataset.t))));}
 function clearHL(){document.querySelectorAll(".dim").forEach(e=>e.classList.remove("dim")); NB=null;}
-function highlight(){NB=null; if(!DATA)return; const q=$("q").value.trim().toLocaleLowerCase("ko-KR"); if(!q){clearHL();return;}
-  const u=new Set(); DATA.nodes.forEach((n,i)=>{ if(visN(n)&&n[1].toLocaleLowerCase("ko-KR").includes(q)) lineage(i).forEach(x=>u.add(x)); });
-  document.querySelectorAll("[data-id]").forEach(g=>g.classList.toggle("dim",!u.has(+g.dataset.id)));
-  document.querySelectorAll(".ribbon").forEach(p=>p.classList.toggle("dim",!(u.has(+p.dataset.s)&&u.has(+p.dataset.t))));}
+function highlight(updateFocus=true){
+  NB=null;
+  const term=$("q").value.trim();
+  const query=term.toLocaleLowerCase("ko-KR");
+  const matches=new Set();
+  const related=new Set();
+  if (DATA && query) {
+    DATA.nodes.forEach((n,i)=>{
+      if (visN(n) && n[1].toLocaleLowerCase("ko-KR").includes(query)) {
+        matches.add(i);
+        lineage(i).forEach(id=>related.add(id));
+      }
+    });
+  }
+  document.querySelectorAll("#svg [data-id]").forEach(node=>{
+    const id=Number(node.dataset.id);
+    node.toggleAttribute("data-match",matches.has(id));
+    node.classList.toggle("dim",related.size>0 && !related.has(id));
+  });
+  document.querySelectorAll("#svg .ribbon").forEach(path=>{
+    const connected=related.has(Number(path.dataset.s)) && related.has(Number(path.dataset.t));
+    path.classList.toggle("dim",related.size>0 && !connected);
+  });
+  if (updateFocus) {
+    plotSearchFeedback(term,matches.size);
+    enableFirstPlotTarget();
+  }
+}
 function el(tag,attr){const e=document.createElementNS(SVGNS,tag);for(const k in attr)e.setAttribute(k,attr[k]);return e;}
 boot();
 </script>

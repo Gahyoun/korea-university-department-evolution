@@ -1,103 +1,39 @@
-<!DOCTYPE html>
-<html lang="ko" data-krds-mode="light">
-<head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<title>학과명 키워드 추이 · 한국 대학 학과의 변천사</title>
-<link rel="stylesheet" href="assets/krds/primitives.css">
-<link rel="stylesheet" href="assets/krds/semantic.css">
-<link rel="stylesheet" href="assets/site.css">
-<link rel="stylesheet" href="assets/viewer.css">
-<script src="assets/site.js" defer></script>
-</head>
-<body>
-<div id="krds-skip-link"><a href="#contents">본문 바로가기</a></div>
-<header id="krds-header">
-  <div class="inner header-branding">
-    <a class="site-identity" href="index.html">대학 학과 변천사</a>
-    <div class="header-actions">
-      <label class="screen-mode" for="screen-mode">
-        <span class="sr-only">화면 설정</span>
-        <select id="screen-mode" title="화면 설정">
-          <option value="light">기본 화면</option>
-          <option value="high-contrast">선명한 화면</option>
-          <option value="theme">시스템 설정</option>
-        </select>
-      </label>
-      <a class="source-link" href="https://github.com/Gahyoun/korea-university-department-evolution">GitHub <span aria-hidden="true">↗</span></a>
-      <button class="btn-navi" type="button" aria-controls="primary-nav" aria-expanded="false" hidden>
-        <span class="menu-icon" aria-hidden="true">☰</span> 메뉴
-      </button>
-    </div>
-  </div>
-  <nav class="krds-main-menu" id="primary-nav" aria-label="주 메뉴">
-    <ul class="inner gnb-menu">
-      <li><a class="gnb-main-trigger" href="index.html">개요</a></li>
-      <li><a class="gnb-main-trigger" href="alluvial.html">학과 계보</a></li>
-      <li><a class="gnb-main-trigger" href="namesplit.html">학과명 분화</a></li>
-      <li><a class="gnb-main-trigger" href="keywords.html" aria-current="page">키워드 추이</a></li>
-      <li><a class="gnb-main-trigger" href="faculty.html">전임교원 계보</a></li>
-    </ul>
-  </nav>
-</header>
-<main id="contents" class="inner viewer" tabindex="-1">
-  <nav class="krds-breadcrumb-wrap" aria-label="현재 위치">
-    <ol class="breadcrumb"><li><a href="index.html">개요</a></li><li aria-current="page">학과명 키워드 추이</li></ol>
-  </nav>
-  <h1 class="page-title">학과명 키워드 추이</h1>
-  <p class="page-lead">2014–2026년 학과명에 등장한 키워드의 빈도를 연도별로 비교합니다.</p>
-  <div class="filter-panel" role="group" aria-label="분석 필터">
-    <div class="filter-field"><label for="broad">대계열</label><select id="broad"></select></div>
-    <div class="filter-field"><span id="mode-label">집계 기준</span>
-      <div class="seg" id="mode" role="group" aria-labelledby="mode-label">
-        <button type="button" data-m="new" class="on" aria-pressed="true">신설 학과</button>
-        <button type="button" data-m="act" aria-pressed="false">활성 학과</button>
-      </div>
-    </div>
-    <div class="filter-field"><span id="sort-label">정렬</span>
-      <div class="seg" id="sort" role="group" aria-labelledby="sort-label">
-        <button type="button" data-s="total" class="on" aria-pressed="true">빈도순</button>
-        <button type="button" data-s="rise" aria-pressed="false">급상승순</button>
-      </div>
-    </div>
-  </div>
-  <section class="chart-panel" aria-label="연도별 키워드 빈도">
-    <div class="chart-toolbar">
-      <div class="legend" aria-label="범례">
-        <span><i class="sw" style="background:var(--up)"></i>상승</span>
-        <span><i class="sw" style="background:var(--down)"></i>하락</span>
-        <span><i class="sw" style="background:var(--flat)"></i>유지</span>
-      </div>
-      <div class="chart-help">원 크기 = 등장 빈도</div>
-    </div>
-    <div id="main">
-      <div id="grid" tabindex="0" aria-label="키워드 버블 차트"><svg id="svg"></svg></div>
-      <aside id="side" aria-label="키워드 순위">
-        <h2>급상승 키워드</h2>
-        <p>최근 3년 평균 − 초기 3년 평균</p>
-        <div id="rising"></div>
-        <h2>급하락 키워드</h2>
-        <div id="falling"></div>
-      </aside>
-    </div>
-  </section>
-</main>
-<footer id="krds-footer">
-  <div class="inner footer-content">
-    <div>
-      <strong>대학 학과 변천사</strong>
-      <p>데이터 처리·시각화 <a href="https://github.com/Gahyoun">@dotch_gahyoun</a></p>
-    </div>
-    <ul class="footer-links" aria-label="데이터와 분석 문서">
-      <li><a href="https://www.academyinfo.go.kr">대학알리미 <span aria-hidden="true">↗</span></a></li>
-      <li><a href="https://github.com/Gahyoun/korea-university-department-evolution/blob/main/docs/METHODOLOGY.md">방법론 <span aria-hidden="true">↗</span></a></li>
-      <li><a href="https://github.com/Gahyoun/korea-university-department-evolution/blob/main/docs/SCHEMA.md">데이터 스키마 <span aria-hidden="true">↗</span></a></li>
-    </ul>
-  </div>
-</footer>
-<div id="tip" role="tooltip"></div>
-<script src="assets/plot.js"></script>
-<script>
+<!-- filters -->
+        <div class="filter-field"><label for="broad">대계열</label><select id="broad"></select></div>
+        <div class="filter-field"><span id="mode-label">집계 기준</span>
+          <div class="seg" id="mode" role="group" aria-labelledby="mode-label">
+            <button type="button" data-m="new" class="on" aria-pressed="true">신설 학과</button>
+            <button type="button" data-m="act" aria-pressed="false">활성 학과</button>
+          </div>
+        </div>
+        <div class="filter-field"><span id="sort-label">정렬</span>
+          <div class="seg" id="sort" role="group" aria-labelledby="sort-label">
+            <button type="button" data-s="total" class="on" aria-pressed="true">빈도순</button>
+            <button type="button" data-s="rise" aria-pressed="false">급상승순</button>
+          </div>
+        </div>
+<!-- /filters -->
+<!-- chart -->
+      <div class="chart-toolbar">
+            <div class="legend" aria-label="범례">
+              <span><i class="sw" style="background:var(--up)"></i>상승</span>
+              <span><i class="sw" style="background:var(--down)"></i>하락</span>
+              <span><i class="sw" style="background:var(--flat)"></i>유지</span>
+            </div>
+            <div class="chart-help">원 크기 = 등장 빈도</div>
+          </div>
+          <div id="main">
+            <div id="grid" tabindex="0" aria-label="키워드 버블 차트"><svg id="svg" role="group" aria-label="연도별 빈도"></svg></div>
+            <aside id="side" aria-label="키워드 순위">
+              <h4>급상승 키워드</h4>
+              <p>최근 3년 평균 − 초기 3년 평균</p>
+              <div id="rising"></div>
+              <h4>급하락 키워드</h4>
+              <div id="falling"></div>
+            </aside>
+          </div>
+<!-- /chart -->
+<!-- script -->
 /*__DATA__*/
 const $=id=>document.getElementById(id), SVGNS="http://www.w3.org/2000/svg";
 const YEARS=PAYLOAD.years, NY=YEARS.length;
@@ -128,6 +64,7 @@ function late(a){return (a[NY-1]+a[NY-2]+a[NY-3])/3;}
 function trendColor(a){const d=late(a)-early(a); if(d>0.6)return "var(--up)"; if(d<-0.6)return "var(--down)"; return "var(--flat)";}
 
 function draw(updateRankings=true){
+  if (updateRankings) resetPlotDetails();
   const d=curData();
   let entries=Object.entries(d);
   if(sortBy==="total") entries.sort((a,b)=>total(b[1])-total(a[1]));
@@ -152,10 +89,19 @@ function draw(updateRankings=true){
     YEARS.forEach((yr,i)=>{const v=arr[i]; if(!v)return; const cx=X0+i*COLW+COLW/2;
       const c=el("circle",{cx,cy:y,r:R(v),fill:trendColor(arr),"fill-opacity":0.82});
       c.addEventListener("mouseenter",e=>tip(e,kw,yr,v,arr));
-      c.addEventListener("click",e=>tip(e,kw,yr,v,arr));
+      configurePlotTarget(c, `${kw}, ${yr}년 ${v}건`, event=>tip(event,kw,yr,v,arr));
       c.addEventListener("mousemove",mv); c.addEventListener("mouseleave",()=>$("tip").style.display="none");
       svg.appendChild(c);});
   });
+  enableFirstPlotTarget();
+  const highest=Object.entries(d).map(([word,counts])=>[word,late(counts)-early(counts)])
+    .filter(([,change])=>change>0).sort((a,b)=>b[1]-a[1])[0];
+  updateAnalysisResult(mode==="new"?"신설 학과 키워드":"활성 학과 키워드",
+    `${broad==="ALL"?"전체 대계열":broad} · ${YEARS[0]}–${YEARS.at(-1)}`, [
+      ["표시 키워드",`${entries.length}개`],
+      ["비교 기간",`${NY}개년`],
+      ["증가 폭 1위",highest?highest[0]:"해당 없음"],
+    ]);
   if(updateRankings) buildSide();
 }
 function buildSide(){
@@ -195,6 +141,4 @@ function mv(e){positionPlotTip(e);}
 function el(tag,attr){const e=document.createElementNS(SVGNS,tag);for(const k in attr)e.setAttribute(k,attr[k]);return e;}
 window.addEventListener("resize",()=>draw(false));
 init();
-</script>
-</body>
-</html>
+<!-- /script -->

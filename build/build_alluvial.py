@@ -2,27 +2,14 @@
 """
 lineage.json -> out/alluvial/ (per-school compact JSON) + out/alluvial.html (viewer)
 """
-import json, os, collections
+import json, os
+
+from render_viewer import render_viewer
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 ROOT = os.path.dirname(HERE)
 OUT = os.path.join(ROOT, "out")
 ADIR = os.path.join(OUT, "alluvial")
-
-VIEWS = [
-    ("alluvial.html", "msz", "학과 계보",
-     "2014–2026년 대학별 학과의 신설·통합·분리·폐지 흐름입니다. 노드 높이는 학과·학부에 묶인 전공 수입니다."),
-    ("faculty.html", "ft", "전임교원 계보",
-     "2015–2025년 대학별 학과 계보입니다. 노드 높이는 전임교원 수이며, 회색 노드는 교원 수 미상입니다."),
-]
-
-def render(template, mode, title, sub):
-    current = ' aria-current="page"'
-    return (template.replace("__SIZE_MODE__", mode)
-                    .replace("__PAGE_TITLE__", title)
-                    .replace("__PAGE_SUB__", sub)
-                    .replace("__DEPARTMENT_CURRENT__", current if mode == "msz" else "")
-                    .replace("__FACULTY_CURRENT__", current if mode == "ft" else ""))
 
 def slug(s):
     return "".join(c if c.isalnum() else "_" for c in s)
@@ -77,12 +64,9 @@ def main():
     index.sort(key=lambda x: x["school"])   # 가나다순
     with open(os.path.join(ADIR, "_index.json"), "w", encoding="utf-8") as f:
         json.dump({"years": meta["years"], "schools": index}, f, ensure_ascii=False)
-    # write viewer html — 하나의 템플릿에서 크기 모드만 바꿔 두 페이지 생성(데이터 공유)
-    with open(os.path.join(HERE, "alluvial_template.html"), encoding="utf-8") as f:
-        tpl = f.read()
-    for page, mode, title, sub in VIEWS:
-        with open(os.path.join(OUT, page), "w", encoding="utf-8") as f:
-            f.write(render(tpl, mode, title, sub))
+    for page in ("alluvial", "faculty"):
+        with open(os.path.join(OUT, page + ".html"), "w", encoding="utf-8") as f:
+            f.write(render_viewer(page))
     n_ft = sum(1 for s in index if s.get("hasft"))
     print("schools:", len(index), "| 교수데이터 학교:", n_ft, "| pages: alluvial.html, faculty.html")
 
