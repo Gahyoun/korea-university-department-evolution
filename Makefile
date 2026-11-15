@@ -19,6 +19,9 @@ viz: data        ## 3) 뷰어 데이터 산출 (alluvial / namesplit / keywords)
 	$(PY) build/build_alluvial.py
 	$(PY) build/build_namesplit.py
 	$(PY) build/build_keywords.py
+	mkdir -p out/assets
+	cp -R assets/. out/assets/
+	cp index.html out/
 
 manifest:        ## 4) 빌드 매니페스트 (버전/지문)
 	$(PY) build/make_manifest.py
@@ -30,7 +33,7 @@ serve:           ## 로컬 미리보기 (파일 fetch용 정적 서버)
 	cd out && $(PY) -m http.server 8800
 
 clean:
-	rm -rf data/*.json out/alluvial out/namesplit out/*.html out/manifest.json
+	rm -rf data/*.json out/alluvial out/namesplit out/assets out/*.html out/manifest.json
 
 help:            ## 타깃 목록
 	@grep -E '^[a-z]+:.*##' $(MAKEFILE_LIST) | sed 's/:.*## /\t/'

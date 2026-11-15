@@ -1,74 +1,102 @@
 <!DOCTYPE html>
-<html lang="ko">
+<html lang="ko" data-krds-mode="light">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>학과 명칭 키워드 Temporal · 2014–2026</title>
-<style>
-  :root{ --bg:#0f1115; --panel:#171a21; --ink:#e8eaed; --mut:#9aa0aa; --line:#2a2f3a;
-    --up:#3ddc84; --down:#ff6b6b; --flat:#6aa6ff; }
-  *{box-sizing:border-box}
-  body{margin:0;font-family:-apple-system,BlinkMacSystemFont,"Apple SD Gothic Neo","Pretendard","Malgun Gothic",sans-serif;background:var(--bg);color:var(--ink)}
-  header{padding:10px 16px;border-bottom:1px solid var(--line);display:flex;gap:12px;align-items:center;flex-wrap:wrap;position:sticky;top:0;background:var(--bg);z-index:5}
-  h1{font-size:14px;margin:0;font-weight:700}
-  .sub{color:var(--mut);font-size:11px}
-  a.home{color:var(--mut);font-size:11px;text-decoration:none;display:inline-block;margin-bottom:2px}
-  a.home:hover{color:var(--ink)}
-  select{background:var(--panel);color:var(--ink);border:1px solid var(--line);border-radius:8px;padding:6px 9px;font-size:13px}
-  .seg{display:inline-flex;border:1px solid var(--line);border-radius:8px;overflow:hidden}
-  .seg button{background:var(--panel);color:var(--mut);border:0;padding:6px 12px;font-size:12px;cursor:pointer}
-  .seg button.on{background:#2b3242;color:var(--ink);font-weight:600}
-  .legend{margin-left:auto;font-size:11px;color:var(--mut);display:flex;gap:12px;align-items:center}
-  .dot{width:10px;height:10px;border-radius:50%;display:inline-block;margin-right:3px;vertical-align:-1px}
-  #main{display:flex;gap:0;height:calc(100vh - 92px)}
-  #grid{flex:1;overflow:auto;padding:8px 0 40px}
-  #side{width:260px;border-left:1px solid var(--line);background:var(--panel);overflow:auto;padding:12px 14px}
-  #side h2{font-size:12px;color:var(--mut);margin:0 0 8px;text-transform:uppercase;letter-spacing:.4px}
-  .rk{display:flex;align-items:center;gap:8px;padding:5px 0;border-bottom:1px solid #ffffff0d;cursor:pointer;font-size:13px}
-  .rk:hover{color:#fff}
-  .rk .kw{flex:1}
-  .rk .delta{font-variant-numeric:tabular-nums;font-weight:600}
-  .up{color:var(--up)} .down{color:var(--down)}
-  #tip{position:fixed;pointer-events:none;background:#000e;border:1px solid var(--line);border-radius:8px;padding:9px 11px;font-size:12px;max-width:320px;display:none;z-index:9;line-height:1.5}
-  #tip .d{font-weight:700;font-size:13px}
-  #tip .m{color:var(--mut)}
-  #tip .ex{color:#bcd;margin-top:4px;font-size:11px}
-  text{font-family:inherit}
-  .ylabel{fill:#dfe3ea;font-size:12px}
-  .ylabel.hot{fill:#fff;font-weight:700}
-  .yearlbl{fill:var(--mut);font-size:11px;text-anchor:middle}
-  .gridline{stroke:#ffffff0a}
-</style>
+<title>학과명 키워드 추이 · 한국 대학 학과의 변천사</title>
+<link rel="stylesheet" href="assets/krds/primitives.css">
+<link rel="stylesheet" href="assets/krds/semantic.css">
+<link rel="stylesheet" href="assets/site.css">
+<link rel="stylesheet" href="assets/viewer.css">
+<script src="assets/site.js" defer></script>
 </head>
 <body>
-<header>
-  <div><a class="home" href="index.html">← 메인페이지</a><h1>학과 명칭 키워드 Temporal Analysis</h1>
-    <div class="sub">2014–2026 · 소·대계열별 학과명 키워드 변화 · 버블 크기=빈도 · 대학알리미</div></div>
-  <select id="broad"></select>
-  <div class="seg" id="mode">
-    <button data-m="new" class="on">신설 학과 키워드</button>
-    <button data-m="act">활성 학과 전체</button>
+<div id="krds-skip-link"><a href="#contents">본문 바로가기</a></div>
+<header id="krds-header">
+  <div class="inner header-branding">
+    <a class="site-identity" href="index.html">대학 학과 변천사</a>
+    <div class="header-actions">
+      <label class="screen-mode" for="screen-mode">
+        <span class="sr-only">화면 설정</span>
+        <select id="screen-mode" title="화면 설정">
+          <option value="light">기본 화면</option>
+          <option value="high-contrast">선명한 화면</option>
+          <option value="theme">시스템 설정</option>
+        </select>
+      </label>
+      <a class="source-link" href="https://github.com/Gahyoun/korea-university-department-evolution">GitHub <span aria-hidden="true">↗</span></a>
+      <button class="btn-navi" type="button" aria-controls="primary-nav" aria-expanded="false" hidden>
+        <span class="menu-icon" aria-hidden="true">☰</span> 메뉴
+      </button>
+    </div>
   </div>
-  <div class="seg" id="sort">
-    <button data-s="total" class="on">빈도순</button>
-    <button data-s="rise">급상승순</button>
-  </div>
-  <div class="legend">
-    <span><span class="dot" style="background:var(--up)"></span>상승</span>
-    <span><span class="dot" style="background:var(--down)"></span>하락</span>
-    <span><span class="dot" style="background:var(--flat)"></span>유지</span>
-  </div>
+  <nav class="krds-main-menu" id="primary-nav" aria-label="주 메뉴">
+    <ul class="inner gnb-menu">
+      <li><a class="gnb-main-trigger" href="index.html">개요</a></li>
+      <li><a class="gnb-main-trigger" href="alluvial.html">학과 계보</a></li>
+      <li><a class="gnb-main-trigger" href="namesplit.html">학과명 분화</a></li>
+      <li><a class="gnb-main-trigger" href="keywords.html" aria-current="page">키워드 추이</a></li>
+      <li><a class="gnb-main-trigger" href="faculty.html">전임교원 계보</a></li>
+    </ul>
+  </nav>
 </header>
-<div id="main">
-  <div id="grid"><svg id="svg"></svg></div>
-  <div id="side">
-    <h2>급상승 키워드 (최근3년 − 초기3년)</h2>
-    <div id="rising"></div>
-    <h2 style="margin-top:18px">급하락 키워드</h2>
-    <div id="falling"></div>
+<main id="contents" class="inner viewer" tabindex="-1">
+  <nav class="krds-breadcrumb-wrap" aria-label="현재 위치">
+    <ol class="breadcrumb"><li><a href="index.html">개요</a></li><li aria-current="page">학과명 키워드 추이</li></ol>
+  </nav>
+  <h1 class="page-title">학과명 키워드 추이</h1>
+  <p class="page-lead">2014–2026년 학과명에 등장한 키워드의 빈도를 연도별로 비교합니다.</p>
+  <div class="filter-panel" role="group" aria-label="분석 필터">
+    <div class="filter-field"><label for="broad">대계열</label><select id="broad"></select></div>
+    <div class="filter-field"><span id="mode-label">집계 기준</span>
+      <div class="seg" id="mode" role="group" aria-labelledby="mode-label">
+        <button type="button" data-m="new" class="on" aria-pressed="true">신설 학과</button>
+        <button type="button" data-m="act" aria-pressed="false">활성 학과</button>
+      </div>
+    </div>
+    <div class="filter-field"><span id="sort-label">정렬</span>
+      <div class="seg" id="sort" role="group" aria-labelledby="sort-label">
+        <button type="button" data-s="total" class="on" aria-pressed="true">빈도순</button>
+        <button type="button" data-s="rise" aria-pressed="false">급상승순</button>
+      </div>
+    </div>
   </div>
-</div>
-<div id="tip"></div>
+  <section class="chart-panel" aria-label="연도별 키워드 빈도">
+    <div class="chart-toolbar">
+      <div class="legend" aria-label="범례">
+        <span><i class="sw" style="background:var(--up)"></i>상승</span>
+        <span><i class="sw" style="background:var(--down)"></i>하락</span>
+        <span><i class="sw" style="background:var(--flat)"></i>유지</span>
+      </div>
+      <div class="chart-help">원 크기 = 등장 빈도</div>
+    </div>
+    <div id="main">
+      <div id="grid" tabindex="0" aria-label="키워드 버블 차트"><svg id="svg"></svg></div>
+      <aside id="side" aria-label="키워드 순위">
+        <h2>급상승 키워드</h2>
+        <p>최근 3년 평균 − 초기 3년 평균</p>
+        <div id="rising"></div>
+        <h2>급하락 키워드</h2>
+        <div id="falling"></div>
+      </aside>
+    </div>
+  </section>
+</main>
+<footer id="krds-footer">
+  <div class="inner footer-content">
+    <div>
+      <strong>대학 학과 변천사</strong>
+      <p>데이터 처리·시각화 <a href="https://github.com/Gahyoun">@dotch_gahyoun</a></p>
+    </div>
+    <ul class="footer-links" aria-label="데이터와 분석 문서">
+      <li><a href="https://www.academyinfo.go.kr">대학알리미 <span aria-hidden="true">↗</span></a></li>
+      <li><a href="https://github.com/Gahyoun/korea-university-department-evolution/blob/main/docs/METHODOLOGY.md">방법론 <span aria-hidden="true">↗</span></a></li>
+      <li><a href="https://github.com/Gahyoun/korea-university-department-evolution/blob/main/docs/SCHEMA.md">데이터 스키마 <span aria-hidden="true">↗</span></a></li>
+    </ul>
+  </div>
+</footer>
+<div id="tip" role="tooltip"></div>
+<script src="assets/plot.js"></script>
 <script>
 /*__DATA__*/
 const $=id=>document.getElementById(id), SVGNS="http://www.w3.org/2000/svg";
@@ -78,15 +106,20 @@ let broad="ALL", mode="new", sortBy="total", hotKw=null;
 function init(){
   const sb=$("broad");
   PAYLOAD.broads.forEach(b=>{const o=document.createElement("option");o.value=b;
-    o.textContent="대계열: "+(b==="ALL"?"전체":b); sb.appendChild(o);});
-  sb.onchange=()=>{broad=sb.value; draw();};
+    o.textContent=b==="ALL"?"전체":b; sb.appendChild(o);});
+  sb.onchange=()=>{broad=sb.value; hotKw=null; draw();};
   $("mode").querySelectorAll("button").forEach(btn=>btn.onclick=()=>{
-    mode=btn.dataset.m; setseg("mode",btn); draw();});
+    mode=btn.dataset.m; hotKw=null; setseg("mode",btn); draw();});
   $("sort").querySelectorAll("button").forEach(btn=>btn.onclick=()=>{
     sortBy=btn.dataset.s; setseg("sort",btn); draw();});
   draw();
 }
-function setseg(id,btn){$(id).querySelectorAll("button").forEach(b=>b.classList.remove("on"));btn.classList.add("on");}
+function setseg(id,btn){
+  $(id).querySelectorAll("button").forEach(button=>{
+    button.classList.toggle("on",button===btn);
+    button.setAttribute("aria-pressed",String(button===btn));
+  });
+}
 
 function curData(){ return PAYLOAD.data[broad][mode] || {}; }
 function total(a){return a.reduce((x,y)=>x+y,0);}
@@ -94,16 +127,18 @@ function early(a){return (a[0]+a[1]+a[2])/3;}
 function late(a){return (a[NY-1]+a[NY-2]+a[NY-3])/3;}
 function trendColor(a){const d=late(a)-early(a); if(d>0.6)return "var(--up)"; if(d<-0.6)return "var(--down)"; return "var(--flat)";}
 
-function draw(){
+function draw(updateRankings=true){
   const d=curData();
   let entries=Object.entries(d);
   if(sortBy==="total") entries.sort((a,b)=>total(b[1])-total(a[1]));
   else entries.sort((a,b)=>(late(b[1])-early(b[1]))-(late(a[1])-early(a[1])));
+  const selected=entries.find(([keyword])=>keyword===hotKw);
   entries=entries.slice(0,42);
+  if(selected && !entries.includes(selected)) entries.push(selected);
   const maxc=Math.max(1,...entries.flatMap(e=>e[1]));
   const R=v=> v<=0?0:Math.max(2.2, 16*Math.sqrt(v/maxc));
 
-  const ROWH=26, X0=140, COLW=Math.max(46,Math.min(70,(window.innerWidth-260-X0-40)/NY)), TOP=34;
+  const ROWH=34, X0=106, COLW=Math.max(47,Math.floor(($("grid").clientWidth-X0-21)/NY)), TOP=34;
   const W=X0+NY*COLW+20, H=TOP+entries.length*ROWH+10;
   const svg=$("svg"); svg.innerHTML=""; svg.setAttribute("width",W); svg.setAttribute("height",H);
   // year headers + gridlines
@@ -113,22 +148,40 @@ function draw(){
   entries.forEach(([kw,arr],ri)=>{
     const y=TOP+ri*ROWH+ROWH/2;
     const lab=el("text",{class:"ylabel"+(kw===hotKw?" hot":""),x:X0-10,y,"text-anchor":"end","dominant-baseline":"middle"});
-    lab.textContent=kw; svg.appendChild(lab);
+    lab.textContent=kw; lab.dataset.keyword=kw; svg.appendChild(lab);
     YEARS.forEach((yr,i)=>{const v=arr[i]; if(!v)return; const cx=X0+i*COLW+COLW/2;
       const c=el("circle",{cx,cy:y,r:R(v),fill:trendColor(arr),"fill-opacity":0.82});
       c.addEventListener("mouseenter",e=>tip(e,kw,yr,v,arr));
+      c.addEventListener("click",e=>tip(e,kw,yr,v,arr));
       c.addEventListener("mousemove",mv); c.addEventListener("mouseleave",()=>$("tip").style.display="none");
       svg.appendChild(c);});
   });
-  buildSide();
+  if(updateRankings) buildSide();
 }
 function buildSide(){
   const d=curData(); const arr=Object.entries(d).map(([kw,a])=>[kw,late(a)-early(a),a]);
   const up=arr.filter(x=>x[1]>0).sort((a,b)=>b[1]-a[1]).slice(0,16);
   const dn=arr.filter(x=>x[1]<0).sort((a,b)=>a[1]-b[1]).slice(0,12);
-  const row=(kw,delta)=>{const div=document.createElement("div");div.className="rk";
-    div.innerHTML=`<span class="kw">${kw}</span><span class="delta ${delta>=0?'up':'down'}">${delta>=0?'+':''}${delta.toFixed(1)}</span>`;
-    div.onmouseenter=()=>{hotKw=kw; draw();}; div.onmouseleave=()=>{hotKw=null; draw();}; return div;};
+  const row=(kw,delta)=>{
+    const button=document.createElement("button");
+    button.type="button";
+    button.className="rk";
+    button.dataset.keyword=kw;
+    button.setAttribute("aria-pressed",String(kw===hotKw));
+    button.innerHTML=`<span class="kw">${kw}</span><span class="delta ${delta>=0?'up':'down'}">${delta>=0?'+':''}${delta.toFixed(1)}</span>`;
+    button.onclick=()=>{
+      hotKw=hotKw===kw?null:kw;
+      draw(false);
+      $("side").querySelectorAll(".rk").forEach(row=>{
+        row.setAttribute("aria-pressed",String(row.dataset.keyword===hotKw));
+      });
+      if(hotKw){
+        const label=[...$("svg").querySelectorAll(".ylabel")].find(node=>node.dataset.keyword===hotKw);
+        if(label) $("grid").scrollTop=Math.max(0,Number(label.getAttribute("y"))-$("grid").clientHeight/2);
+      }
+    };
+    return button;
+  };
   const ru=$("rising"); ru.innerHTML=""; up.forEach(x=>ru.appendChild(row(x[0],x[1])));
   const rd=$("falling"); rd.innerHTML=""; dn.forEach(x=>rd.appendChild(row(x[0],x[1])));
 }
@@ -138,9 +191,9 @@ function tip(e,kw,yr,v,arr){const t=$("tip");
     `<div class="m">총 ${total(arr)}건 · 초기 ${early(arr).toFixed(1)} → 최근 ${late(arr).toFixed(1)}</div>`+
     (ex?`<div class="ex">예: ${ex}</div>`:"");
   t.style.display="block"; mv(e);}
-function mv(e){const t=$("tip");let x=e.clientX+14;if(x+320>innerWidth)x=e.clientX-320;t.style.left=x+"px";t.style.top=(e.clientY+14)+"px";}
+function mv(e){positionPlotTip(e);}
 function el(tag,attr){const e=document.createElementNS(SVGNS,tag);for(const k in attr)e.setAttribute(k,attr[k]);return e;}
-window.addEventListener("resize",()=>draw());
+window.addEventListener("resize",()=>draw(false));
 init();
 </script>
 </body>
